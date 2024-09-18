@@ -1,20 +1,20 @@
-from readerdeleter.build.dawg import DAWG
+from readerdeleter.build.dafsa import DAFSA
 
 
-def test_dawg_positive():
-    dawg = DAWG()
-    dawg.insert_word("tests")
-    assert dawg.is_word("tests")
+def test_dafsa_positive():
+    dafsa = DAFSA()
+    dafsa.add_word("tests")
+    assert dafsa.is_word("tests")
 
 
-def test_dawg_negative():
-    dawg = DAWG()
-    dawg.insert_word("tests")
-    assert not dawg.is_word("foo")
+def test_dafsa_negative():
+    dafsa = DAFSA()
+    dafsa.add_word("tests")
+    assert not dafsa.is_word("foo")
 
 
-def test_dawg_partial():
-    dawg = DAWG()
-    dawg.insert_word("test")
-    assert not dawg.is_word("tests")
-    assert not dawg.is_word("tes")
+def test_dafsa_partial():
+    dafsa = DAFSA()
+    dafsa.add_word("test")
+    assert not dafsa.is_word("tests")
+    assert not dafsa.is_word("tes")
