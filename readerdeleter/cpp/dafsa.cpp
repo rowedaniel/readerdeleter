@@ -64,8 +64,6 @@ private:
         auto newNode = new DAFSAnode();
         node->children[c] = newNode;
         node = newNode;
-        std::cout << "creating new node: " << c << "(" << node << ")"
-                  << std::endl;
       } else {
         // character found
         node = node->children[c];
@@ -79,10 +77,7 @@ private:
   }
 
   bool equiv(DAFSAnode *a, DAFSAnode *b) {
-    std::cout << "testing equivalence of " << a << " and " << b << std::endl;
     if (a->terminal != b->terminal) {
-      std::cout << "don't agree on terminality :(  a->terminal: " << a->terminal
-                << ", and b->terminal: " << b->terminal << std::endl;
       return false;
     }
 
@@ -90,14 +85,12 @@ private:
     for (auto t = a->children.begin(); t != a->children.end(); ++t) {
       if (b->children.find(t->first) == b->children.end() ||
           b->children[t->first] != t->second) {
-        std::cout << "no agreement on " << t->first << std::endl;
         return false;
       }
     }
     for (auto t = b->children.begin(); t != b->children.end(); ++t) {
       if (a->children.find(t->first) == a->children.end() ||
           a->children[t->first] != t->second) {
-        std::cout << "no agreement on " << t->first << std::endl;
         return false;
       }
     }
@@ -106,6 +99,12 @@ private:
   }
 
   void replace_or_register(DAFSAnode *state) {
+
+    // exit condition---should only trigger if finish() is called with no words
+    // having been passed in
+    if (state->children.empty())
+      return;
+
     auto child_key = last_child_key(state);
     auto child = state->children[child_key];
 
@@ -114,8 +113,6 @@ private:
 
     for (auto q : rep_reg_cache) {
       if (equiv(q, child)) {
-        std::cout << "Redundant node found for child '" << child_key
-                  << "'. Deleting" << std::endl;
         state->children[child_key] = q;
         delete child;
         return;
@@ -132,36 +129,19 @@ public:
 
     // assume words are added in order
     if (word < previous_word) {
-      std::cout << "attempted to add words out of order" << std::endl;
+      std::cout << "attempted to add words out of order, aborting" << std::endl;
+      exit(1);
     }
 
-    std::cout << "Getting prefix: ";
     auto prefix = get_prefix(word);
-    std::cout << prefix << std::endl;
-
-    std::cout << "Getting last state: ";
     auto last_state = traverse(root, prefix);
-    std::cout << last_state << std::endl;
-
-    std::cout << "Getting current suffix: ";
     auto current_suffix = word.substr(prefix.length());
-    std::cout << current_suffix << std::endl;
-
     if (!last_state->children.empty()) {
-      std::cout << "replacing or registering " << std::endl;
       replace_or_register(last_state);
     }
-
-    std::cout << "Adding suffix" << std::endl;
     add_suffix(last_state, current_suffix);
 
     previous_word = word;
-
-    std::cout << "Register presently looks like: [";
-    for (auto it : rep_reg_cache) {
-      std::cout << it << ", ";
-    }
-    std::cout << "]" << std::endl;
   }
 
   void finish() { replace_or_register(root); }
