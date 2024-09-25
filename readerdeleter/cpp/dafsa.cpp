@@ -7,6 +7,7 @@
 #include <list>
 #include <map>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <string>
 
 class DAFSAnode {
@@ -150,6 +151,19 @@ public:
     auto node = traverse(root, word);
     return node != NULL && node->terminal;
   }
+
+  std::map<char, int> next_characters(std::string word) {
+    auto node = traverse(root, word);
+    if (node == NULL)
+      return {};
+
+    std::map<char, int> node_arrows;
+    for (auto arrow = node->children.begin(); arrow != node->children.end();
+         ++arrow) {
+      node_arrows[arrow->first] = (long int)arrow->second;
+    }
+    return node_arrows;
+  }
 };
 
 int add(int a, int b) { return a + b; }
@@ -163,5 +177,6 @@ PYBIND11_MODULE(dafsa, m) {
       .def(py::init<>())
       .def("add_word", &DAFSA::add_word)
       .def("is_word", &DAFSA::is_word)
+      .def("next_characters", &DAFSA::next_characters)
       .def("finish", &DAFSA::finish);
 }
