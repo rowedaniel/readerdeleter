@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/rowedaniel/Documents/school/scrabble/readerdeleter/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -Ddafsa_EXPORTS -isystem /Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.12/site-packages/pybind11/include -isystem /usr/local/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/python3.12  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=14.3 -fPIC -fvisibility=hidden -flto -std=gnu++11 -o CMakeFiles/dafsa.dir/cpp/dafsa.cpp.o -c /Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/dafsa.cpp",
+  "file": "/Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/dafsa.cpp"
+}
+]
