@@ -5,7 +5,7 @@
 
 class DAFSAnode {
     public:
-        bool terminal = true;
+        bool terminal = false;
         std::map<char, DAFSAnode*> children;
 };
 
@@ -27,7 +27,7 @@ class DAFSA {
         void add_word(std::string word) {
             // assume words are added in order
             if(word < previous_word) {
-                std::cout << "attempted to add words out of order";
+                std::cout << "attempted to add words out of order" << std::endl;
             }
 
             int prefix = get_prefix(word);
@@ -39,7 +39,6 @@ class DAFSA {
                     // character not found
                     auto newNode =  new DAFSAnode();
                     node->children[c] = newNode;
-                    node->terminal = false;
                     node = newNode;
                     std::cout << "creating new node: " << c << std::endl;
                 } else {
@@ -47,7 +46,7 @@ class DAFSA {
                     node = node->children[c];
                 }
             }
-
+            node->terminal = true;
             previous_word = word;
         }
 
