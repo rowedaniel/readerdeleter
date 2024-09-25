@@ -9,6 +9,9 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.12"
 pybind11 = "^2.13.5"
+matplotlib = "^3.9.2"
+networkx = "^3.3"
+numpy = "^2.1.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
