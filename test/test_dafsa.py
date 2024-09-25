@@ -2,6 +2,11 @@ import random
 
 from readerdeleter.build.dafsa import DAFSA
 
+def test_empty():
+    dafsa = DAFSA()
+    assert not dafsa.is_word("")
+    dafsa.add_word("")
+    assert dafsa.is_word("")
 
 def test_positive():
     dafsa = DAFSA()
