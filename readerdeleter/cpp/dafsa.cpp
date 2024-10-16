@@ -25,7 +25,6 @@ class DAFSA {
 private:
   std::string previous_word = "";
   std::list<DAFSAnode *> rep_reg_cache = {};
-  DAFSAnode *root = new DAFSAnode();
 
   std::string get_prefix(std::string word) {
     /** Get common prefix between word and previous word
@@ -125,6 +124,8 @@ private:
   }
 
 public:
+  DAFSAnode *root = new DAFSAnode();
+
   void add_word(std::string word) {
     /** Add word to the DAFSA structure **/
 
