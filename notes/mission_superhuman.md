@@ -4,6 +4,7 @@
 - Consider converting DAFSA into a GADDAG
   - https://en.wikipedia.org/wiki/GADDAG
   - I think literally exactly the same, but instead of storing dictionary $D$, you store $D' = \{ REV(x)+y | xy \in D\}$
+    - Actually, I think that for my purposes, $D' = \{ y+REV(x) | xy \in D\}$ will be better (so you can check suffix first? Actually idk)
   - Since scrabble words are ~5 characters, will increase size of DAFSA by a factor of 5 loosely
 - Maybe parallelize parts of this?
 - check [here](https://raw.githubusercontent.com/quackle/quackle/refs/heads/master/data/raw_lexica/ods5.raw) for wordlist?
