@@ -10,14 +10,29 @@
 #include <pybind11/stl.h>
 #include <string>
 
+#include "alphabet.h"
+
 class DAFSAnode {
 public:
   bool terminal = false;
-  // TODO: change from using std::map to something more suited
-  // (see
-  // https://martin.ankerl.com/2022/08/27/hashmap-bench-01/#access--find-benchmarks)
-  // Perhaps the right way is simply an array of pointers length of alphabet?
-  std::map<char, DAFSAnode *> children;
+  DAFSAnode* children[alphabet_len];
+
+  DAFSAnode() {
+    for(int i=0; i<alphabet_len; ++i)
+      children[i] = NULL;
+  }
+
+  bool is_null_child(char c) {
+    return children[get_char_num(c)] == NULL;
+  }
+
+  bool is_empty() {
+    for(int i=0; i<alphabet_len; ++i) {
+      if(children[i] != NULL)
+        return false;
+    }
+    return true;
+  }
 };
 
 class DAFSA {
@@ -25,6 +40,7 @@ class DAFSA {
 private:
   std::string previous_word = "";
   std::list<DAFSAnode *> rep_reg_cache = {};
+
 
   std::string get_prefix(std::string word) {
     /** Get common prefix between word and previous word
@@ -48,32 +64,36 @@ private:
       return state;
 
     auto c = word[0];
-    if (state->children.find(c) == state->children.end()) {
+    if (state->is_null_child(c)) {
       return NULL;
     }
 
-    return traverse(state->children[c], word.substr(1));
+    return traverse(state->children[get_char_num(c)], word.substr(1));
   }
 
   void add_suffix(DAFSAnode *state, std::string word) {
     // naively add the word, as if in a trie
     auto node = state;
     for (auto c : word) {
-      if (node->children.find(c) == node->children.end()) {
+      if (node->is_null_child(c)) {
         // character not found
         auto newNode = new DAFSAnode();
-        node->children[c] = newNode;
+        node->children[get_char_num(c)] = newNode;
         node = newNode;
       } else {
         // character found
-        node = node->children[c];
+        node = node->children[get_char_num(c)];
       }
     }
     node->terminal = true;
   }
 
-  char last_child_key(DAFSAnode *state) {
-    return state->children.rbegin()->first;
+  int last_child_key(DAFSAnode *state) {
+    for(int i=alphabet_len-1; i>=0; --i) {
+      if(state->children[i] != NULL)
+        return i;
+    }
+    return -1;
   }
 
   bool equiv(DAFSAnode *a, DAFSAnode *b) {
@@ -82,17 +102,9 @@ private:
     }
 
     // transitions are the same
-    for (auto t = a->children.begin(); t != a->children.end(); ++t) {
-      if (b->children.find(t->first) == b->children.end() ||
-          b->children[t->first] != t->second) {
+    for (int i=0; i<alphabet_len; ++i) {
+      if(b->children[i] != a->children[i])
         return false;
-      }
-    }
-    for (auto t = b->children.begin(); t != b->children.end(); ++t) {
-      if (a->children.find(t->first) == a->children.end() ||
-          a->children[t->first] != t->second) {
-        return false;
-      }
     }
 
     return true;
@@ -102,13 +114,13 @@ private:
 
     // exit condition---should only trigger if finish() is called with no words
     // having been passed in
-    if (state->children.empty())
+    if (state->is_empty())
       return;
 
-    auto child_key = last_child_key(state);
+    int child_key = last_child_key(state);
     auto child = state->children[child_key];
 
-    if (!child->children.empty())
+    if (!child->is_empty())
       replace_or_register(child);
 
     for (auto q : rep_reg_cache) {
@@ -131,16 +143,14 @@ public:
 
     // assume words are added in order
     if (word < previous_word) {
-      std::cout << "attempted to add words out of order, aborting" << std::endl;
       exit(1);
     }
 
     auto prefix = get_prefix(word);
     auto last_state = traverse(root, prefix);
     auto current_suffix = word.substr(prefix.length());
-    if (!last_state->children.empty()) {
+    if (!last_state->is_empty())
       replace_or_register(last_state);
-    }
     add_suffix(last_state, current_suffix);
 
     previous_word = word;
@@ -159,9 +169,10 @@ public:
       return {};
 
     std::map<char, int> node_arrows;
-    for (auto arrow = node->children.begin(); arrow != node->children.end();
-         ++arrow) {
-      node_arrows[arrow->first] = (long int)arrow->second;
+    for (int i=0; i<alphabet_len; ++i) {
+      if(node->children[i] == NULL)
+        continue;
+      node_arrows[alphabet[i]] = (long int)node->children[i];
     }
     return node_arrows;
   }
