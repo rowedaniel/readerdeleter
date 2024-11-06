@@ -20,17 +20,19 @@ def gen_star_up_to(n):
 
 
 def time_func(func):
+    times = []
     def wrapper(*args, **kwargs):
+        f = func(*args, **kwargs)
         t1 = time.time()
-        ret = func(*args, **kwargs)
-        return time.time() - t1, ret
+        for _ in f:
+            times.append(time.time() - t1)
+        return times
 
     return wrapper
 
 
 @time_func
-def generate_words(limit, word_len=20):
-    dafsa = DAFSA()
+def generate_words(dafsa, limit, time_spacing, word_len=20):
     n = 0
     for word in gen_star_up_to(word_len):
         # skip half of all possible words
@@ -39,8 +41,9 @@ def generate_words(limit, word_len=20):
         dafsa.add_word(word)
 
         n += 1
-        if n % 10000 == 0:
-            print(n)
+        if n % time_spacing == 0:
+            print('generated', n)
+            yield True
 
         if n >= limit:
             break
@@ -50,34 +53,38 @@ def generate_words(limit, word_len=20):
 
 
 @time_func
-def check_words(dafsa, limit, word_len=20):
+def check_words(dafsa, limit, time_spacing, word_len=20):
     n = 0
     for word in gen_star_up_to(word_len):
         dafsa.is_word(word)
 
         n += 1
-        if n % 100000 == 0:
-            print(n)
+        if n % time_spacing == 0:
+            print('checked', n)
+            yield True
 
         if n >= limit:
             break
+    return False
 
 
 def main():
 
-    size_limits = np.linspace(0, 100000, 20)
-    gen_times = []
-    read_times = []
+    n = 2000000
+    points = 400
+    freq = n // points
 
-    for lim in size_limits:
-        t1, dafsa = generate_words(lim)
-        t2 = check_words(dafsa, lim * 10)
-        gen_times.append(t1)
-        read_times.append(t2)
+    read_fac = 1
+    
+    x = np.linspace(0, n, points)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(size_limits, gen_times)
-    ax2.plot(size_limits * 100, read_times)
+    dafsa = DAFSA()
+    gen_times = generate_words(dafsa, n, freq)
+    read_times = check_words(dafsa, n*read_fac, freq*read_fac)
+
+    _, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(x, gen_times)
+    ax2.plot(x*read_fac, read_times)
 
     ax1.set_title("generation time")
     ax1.set_ylabel("time (s)")
