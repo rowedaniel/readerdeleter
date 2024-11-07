@@ -15,19 +15,19 @@
 class DAFSAnode {
 public:
   bool terminal = false;
-  DAFSAnode* children[alphabet_len];
+  DAFSAnode* children[alphabet_plus_len];
 
   DAFSAnode() {
-    for(int i=0; i<alphabet_len; ++i)
+    for(int i=0; i<alphabet_plus_len; ++i)
       children[i] = NULL;
   }
 
   bool is_null_child(char c) {
-    return children[get_char_num(c)] == NULL;
+    return children[get_char_plus_num(c)] == NULL;
   }
 
   bool is_empty() {
-    for(int i=0; i<alphabet_len; ++i) {
+    for(int i=0; i<alphabet_plus_len; ++i) {
       if(children[i] != NULL)
         return false;
     }
@@ -60,15 +60,13 @@ private:
     /** This is equivalent to delta* in the paper.
      * It is used here as a helper function
      */
-    if (word.length() == 0)
-      return state;
-
-    auto c = word[0];
-    if (state->is_null_child(c)) {
-      return NULL;
+    auto node = state;
+    for(auto c : word) {
+      if(node == NULL)
+        return NULL;
+      node = node->children[get_char_plus_num(c)];
     }
-
-    return traverse(state->children[get_char_num(c)], word.substr(1));
+    return node;
   }
 
   void add_suffix(DAFSAnode *state, std::string word) {
@@ -78,18 +76,18 @@ private:
       if (node->is_null_child(c)) {
         // character not found
         auto newNode = new DAFSAnode();
-        node->children[get_char_num(c)] = newNode;
+        node->children[get_char_plus_num(c)] = newNode;
         node = newNode;
       } else {
         // character found
-        node = node->children[get_char_num(c)];
+        node = node->children[get_char_plus_num(c)];
       }
     }
     node->terminal = true;
   }
 
   int last_child_key(DAFSAnode *state) {
-    for(int i=alphabet_len-1; i>=0; --i) {
+    for(int i=alphabet_plus_len-1; i>=0; --i) {
       if(state->children[i] != NULL)
         return i;
     }
@@ -102,7 +100,7 @@ private:
     }
 
     // transitions are the same
-    for (int i=0; i<alphabet_len; ++i) {
+    for (int i=0; i<alphabet_plus_len; ++i) {
       if(b->children[i] != a->children[i])
         return false;
     }
@@ -111,7 +109,6 @@ private:
   }
 
   void replace_or_register(DAFSAnode *state) {
-
     // exit condition---should only trigger if finish() is called with no words
     // having been passed in
     if (state->is_empty())
@@ -169,10 +166,10 @@ public:
       return {};
 
     std::map<char, int> node_arrows;
-    for (int i=0; i<alphabet_len; ++i) {
+    for (int i=0; i<alphabet_plus_len; ++i) {
       if(node->children[i] == NULL)
         continue;
-      node_arrows[alphabet[i]] = (long int)node->children[i];
+      node_arrows[alphabet_plus[i]] = (long int)node->children[i];
     }
     return node_arrows;
   }

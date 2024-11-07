@@ -43,21 +43,35 @@ def test_multiple():
     assert dafsa.is_word("testes")
     assert dafsa.is_word("xenomorph")
 
+def test_plus():
+    words = [
+        "et+sts",
+        "set+ts",
+        "t+est",
+        "t+ests",
+        "t+ests",
+        ]
+    dafsa = DAFSA()
+    for word in words:
+        dafsa.add_word(word)
+    for word in words:
+        assert dafsa.is_word(word)
+
 
 def test_random():
     dafsa = DAFSA()
 
-    alphabet = "abcd"
+    alphabet = "abcdxyz"
 
     words = [
         "".join(random.choice(alphabet) for _ in range(random.randint(2, 10)))
-        for _ in range(100)
+        for _ in range(1000)
     ]
     words.sort()
 
     nonwords = [
         "".join(random.choice(alphabet) for _ in range(random.randint(2, 10)))
-        for _ in range(100)
+        for _ in range(1000)
     ]
     nonwords = [word for word in nonwords if word not in words]
 
