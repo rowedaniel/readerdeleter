@@ -167,6 +167,15 @@ public:
     previous_word = word;
   }
 
+  void add_words(std::list<std::string> words) {
+    int i=0;
+    for(std::string word : words) {
+      add_word(word);
+      if(++i % 1000 == 0)
+        std::cout << i << ": " << word << std::endl;
+    }
+  }
+
   void finish() { replace_or_register(root); }
 
   bool is_word(std::string word) {
@@ -199,6 +208,7 @@ PYBIND11_MODULE(dafsa, m) {
   py::class_<DAFSA>(m, "DAFSA")
       .def(py::init<>())
       .def("add_word", &DAFSA::add_word)
+      .def("add_words", &DAFSA::add_words)
       .def("is_word", &DAFSA::is_word)
       .def("next_characters", &DAFSA::next_characters)
       .def("finish", &DAFSA::finish);
