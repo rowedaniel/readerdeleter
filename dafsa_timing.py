@@ -6,7 +6,7 @@ import numpy as np
 
 from readerdeleter.build.dafsa import DAFSA
 
-alphabet = "abcxyz"
+alphabet = "+abcdefghijklmnopqrstuvwxyz"
 
 
 def gen_star_up_to(n):
@@ -14,7 +14,8 @@ def gen_star_up_to(n):
         return ""
 
     for a in alphabet:
-        yield a
+        if random.random() < 0.1:
+            yield a
         for tail in gen_star_up_to(n - 1):
             yield a + tail
 
