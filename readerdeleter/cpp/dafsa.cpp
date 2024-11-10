@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <list>
-#include <map>
+#include <unordered_map>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
@@ -33,14 +33,41 @@ public:
     }
     return true;
   }
+
+  friend bool operator==(const DAFSAnode& a, const DAFSAnode& b) {
+    if (a.terminal != b.terminal) {
+      return false;
+    }
+
+    // transitions are the same
+    for (int i=0; i<alphabet_plus_len; ++i) {
+      if(b.children[i] != a.children[i])
+        return false;
+    }
+
+    return true;
+  }
+
+};
+
+template <>
+struct std::hash<DAFSAnode> {
+  size_t operator()(const DAFSAnode& n) const noexcept {
+    size_t hash = std::hash<bool>{}(n.terminal);
+    for(int i = 0; i<alphabet_plus_len; ++i) {
+      // combine hash with hash of (i, ith child)
+      hash ^= std::hash<size_t>{}(std::hash<DAFSAnode*>{}(n.children[i])*i);
+    }
+    return hash;
+  }
 };
 
 class DAFSA {
 
 private:
   std::string previous_word = "";
-  std::list<DAFSAnode *> rep_reg_cache = {};
-
+  /*std::list<DAFSAnode *> rep_reg_cache = {};*/
+  std::unordered_map<DAFSAnode, DAFSAnode*> rep_reg_cache;
 
   std::string get_prefix(std::string word) {
     /** Get common prefix between word and previous word
@@ -49,7 +76,7 @@ private:
      * paper. Its behavior should be equivalent, though (I hope).
      */
     int prefix;
-    for (prefix = 0; prefix < word.length(); ++prefix) {
+    for (prefix = 0; prefix < (int)word.length(); ++prefix) {
       if (word[prefix] != previous_word[prefix])
         break;
     }
@@ -94,19 +121,6 @@ private:
     return -1;
   }
 
-  bool equiv(DAFSAnode *a, DAFSAnode *b) {
-    if (a->terminal != b->terminal) {
-      return false;
-    }
-
-    // transitions are the same
-    for (int i=0; i<alphabet_plus_len; ++i) {
-      if(b->children[i] != a->children[i])
-        return false;
-    }
-
-    return true;
-  }
 
   void replace_or_register(DAFSAnode *state) {
     // exit condition---should only trigger if finish() is called with no words
@@ -120,16 +134,16 @@ private:
     if (!child->is_empty())
       replace_or_register(child);
 
-    for (auto q : rep_reg_cache) {
-      if (equiv(q, child)) {
-        state->children[child_key] = q;
-        delete child;
-        return;
-      }
+    // check equivalency
+    if(rep_reg_cache.find(*child) != rep_reg_cache.end()) {
+      DAFSAnode* prev_node = rep_reg_cache[*child];
+      state->children[child_key] = prev_node;
+      delete child;
+      return;
     }
 
-    // no equivalent state exists
-    rep_reg_cache.push_back(child);
+    // no equivalent state exists, add to cache
+    rep_reg_cache[*child] = child;
   }
 
 public:
