@@ -3,7 +3,6 @@
  * based on
  * https://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf
  */
-
 #include <cmath>
 #include <cstdint>
 #include <iostream>
@@ -13,7 +12,6 @@
 #include <pybind11/stl.h>
 #include <string>
 
-#include "alphabet.h"
 #include "dafsa.cpp"
 
 using namespace std;
@@ -74,18 +72,17 @@ private:
         for (int i = 0; i < alphabet_len; ++i) {
           // get this character
           auto node = tree.root;
-          if (node->children.find(alphabet[i]) == node->children.end())
+          if (node->children[i] == NULL)
             continue;
-          node = node->children[alphabet[i]];
+          node = node->children[i];
 
           int j = 1;
           // go up
           while (row - j >= 0 && board[row - j][col] != ' ') {
-            if (node->children.find(board[row - j][col]) ==
-                node->children.end()) {
+            if (node->is_null_child(board[row - j][col])) {
               break;
             }
-            node = node->children[board[row - j][col]];
+            node = node->children[get_char_num(board[row - j][col])];
             ++j;
           }
           if (row - j >= 0 && board[row - j][col] != ' ') {
@@ -94,18 +91,17 @@ private:
           }
 
           // check pivot character
-          if (node->children.find('+') == node->children.end())
+          if (node->is_null_child(delim))
             continue;
-          node = node->children['+'];
+          node = node->children[get_char_num(delim)];
 
           // go down
           j = 1;
           while (row + j >= 0 && board[row + j][col] != ' ') {
-            if (node->children.find(board[row + j][col]) ==
-                node->children.end()) {
+            if (node->is_null_child(board[row + j][col])) {
               break;
             }
-            node = node->children[board[row + j][col]];
+            node = node->children[get_char_num(board[row + j][col])];
             ++j;
           }
           if (board[row + j][col] != ' ') {
@@ -126,14 +122,14 @@ private:
     list<tuple<DAFSAnode*, string>> out = {};
 
     if (col < 0) {
-      if (node->children.find('+') != node->children.end())
-        return {make_tuple(node->children['+'], "")};
+      if (!node->is_null_child(delim))
+        return {make_tuple(node->children[get_char_num(delim)], "")};
       return {};
     }
     if (board_row[col] != ' ') {
-      if (node->children.find(board_row[col]) == node->children.end())
+      if (node->is_null_child(board_row[col]))
         return {};
-      DAFSAnode *child = node->children[board_row[col]];
+      DAFSAnode *child = node->children[get_char_num(board_row[col])];
       auto prefixes =
           get_word_prefixes_in_row(board_mask_row, board_row, col - 1, child);
       for (auto [n, prefix] : prefixes) 
@@ -141,9 +137,9 @@ private:
       return out;
     }
 
-    if (node->children.find('+') != node->children.end()) {
+    if (!node->is_null_child(delim)) {
       // reached end of prefix
-      out.push_back(make_tuple(node->children['+'], ""));
+      out.push_back(make_tuple(node->children[get_char_num(delim)], ""));
     }
 
     for (char c : rack_letters) {
@@ -152,9 +148,9 @@ private:
         continue;
       if (!((board_mask_row[col] >> char_num) & 0x1))
         continue;
-      if (node->children.find(c) == node->children.end())
+      if (node->is_null_child(c))
         continue;
-      DAFSAnode *child = node->children[c];
+      DAFSAnode *child = node->children[get_char_num(c)];
 
       // using this character, remove it from the list of allowed characters
       --rack_count[char_num];
@@ -185,9 +181,9 @@ private:
       return {};
     }
     if (board_row[col] != ' ') {
-      if (node->children.find(board_row[col]) == node->children.end())
+      if (node->is_null_child(board_row[col]))
         return {};
-      DAFSAnode *child = node->children[board_row[col]];
+      DAFSAnode *child = node->children[get_char_num(board_row[col])];
       auto suffixes =
           get_word_suffixes_in_row(board_mask_row, board_row, col + 1, child);
       for (auto suffix : suffixes)
@@ -206,9 +202,9 @@ private:
         continue;
       if (!((board_mask_row[col] >> char_num) & 0x1))
         continue;
-      if (node->children.find(c) == node->children.end())
+      if (node->is_null_child(c))
         continue;
-      DAFSAnode *child = node->children[c];
+      DAFSAnode *child = node->children[get_char_num(c)];
 
       // using this character, remove it from the list of allowed characters
       --rack_count[char_num];
@@ -244,12 +240,15 @@ private:
     /*  }*/
     /*}*/
 
+
+    cout << "getting prefixes" << endl;
     for (auto [n, prefix] :
          get_word_prefixes_in_row(board_mask_row, board_row, col, tree.root)) {
       int prefix_offset = 1 - prefix.length();
+      cout << "got prefix: " << prefix << endl;
 
       // remove prefix items from rack
-      for(int i=0; i<prefix.length(); ++i) {
+      for(int i=0; i<(int)prefix.length(); ++i) {
         if(board_row[col+prefix_offset+i] == ' ')
           --rack_count[get_char_num(prefix[i])];
       }
@@ -259,7 +258,7 @@ private:
           out.push_back(make_tuple(row, col - prefix.length() + 1, prefix+suffix));
 
       // add prefix items back to rack for next iteration
-      for(int i=0; i<prefix.length(); ++i) {
+      for(int i=0; i<(int)prefix.length(); ++i) {
         if(board_row[col+prefix_offset+i] == ' ')
           ++rack_count[get_char_num(prefix[i])];
       }

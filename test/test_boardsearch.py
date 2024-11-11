@@ -8,7 +8,7 @@ from readerdeleter.build.boardsearch import BoardSearch
 def test_corner1_horizontal():
     gaddag = generate_GADDAG(["test", "set", "tests"])
     board_data = (
-            tuple("test           "),
+            tuple("TEST           "),
             tuple("               "),
             tuple("               "),
             tuple("               "),
@@ -37,10 +37,10 @@ def test_corner1_horizontal():
 def test_corner1_vertical():
     gaddag = generate_GADDAG(["test", "set", "tests"])
     board_data = (
-            tuple("t              "),
-            tuple("e              "),
-            tuple("s              "),
-            tuple("t              "),
+            tuple("T              "),
+            tuple("E              "),
+            tuple("S              "),
+            tuple("T              "),
             tuple("               "),
             tuple("               "),
             tuple("               "),
@@ -66,7 +66,7 @@ def test_corner1_vertical():
 def test_corner2_horizontal():
     gaddag = generate_GADDAG(["test", "set", "tests"])
     board_data = (
-            tuple("           test"),
+            tuple("           TEST"),
             tuple("               "),
             tuple("               "),
             tuple("               "),
@@ -93,10 +93,10 @@ def test_corner2_horizontal():
 def test_corner2_vertical():
     gaddag = generate_GADDAG(["test", "set", "tests"])
     board_data = (
-            tuple("              t"),
-            tuple("              e"),
-            tuple("              s"),
-            tuple("              t"),
+            tuple("              T"),
+            tuple("              E"),
+            tuple("              S"),
+            tuple("              T"),
             tuple("               "),
             tuple("               "),
             tuple("               "),

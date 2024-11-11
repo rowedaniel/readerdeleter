@@ -1,13 +1,13 @@
 [
 {
   "directory": "/Users/rowedaniel/Documents/school/scrabble/readerdeleter/build",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -Ddafsa_EXPORTS -isystem /Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.13/site-packages/pybind11/include -isystem /usr/local/opt/python@3.13/Frameworks/Python.framework/Versions/3.13/include/python3.13 -std=gnu++11 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=14.3 -fPIC -fvisibility=hidden -flto -o CMakeFiles/dafsa.dir/cpp/dafsa.cpp.o -c /Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/dafsa.cpp",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -Ddafsa_EXPORTS -isystem /Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.13/site-packages/pybind11/include -isystem /usr/local/opt/python@3.13/Frameworks/Python.framework/Versions/3.13/include/python3.13 -Wall -Wextra -O3 -std=gnu++11 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=14.3 -fPIC -fvisibility=hidden -flto -o CMakeFiles/dafsa.dir/cpp/dafsa.cpp.o -c /Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/dafsa.cpp",
   "file": "/Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/dafsa.cpp",
   "output": "CMakeFiles/dafsa.dir/cpp/dafsa.cpp.o"
 },
 {
   "directory": "/Users/rowedaniel/Documents/school/scrabble/readerdeleter/build",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -Dboardsearch_EXPORTS -isystem /Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.13/site-packages/pybind11/include -isystem /usr/local/opt/python@3.13/Frameworks/Python.framework/Versions/3.13/include/python3.13 -std=gnu++11 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=14.3 -fPIC -fvisibility=hidden -flto -o CMakeFiles/boardsearch.dir/cpp/boardsearch.cpp.o -c /Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/boardsearch.cpp",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -Dboardsearch_EXPORTS -isystem /Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.13/site-packages/pybind11/include -isystem /usr/local/opt/python@3.13/Frameworks/Python.framework/Versions/3.13/include/python3.13 -Wall -Wextra -O3 -std=gnu++11 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -mmacosx-version-min=14.3 -fPIC -fvisibility=hidden -flto -o CMakeFiles/boardsearch.dir/cpp/boardsearch.cpp.o -c /Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/boardsearch.cpp",
   "file": "/Users/rowedaniel/Documents/school/scrabble/readerdeleter/cpp/boardsearch.cpp",
   "output": "CMakeFiles/boardsearch.dir/cpp/boardsearch.cpp.o"
 }
