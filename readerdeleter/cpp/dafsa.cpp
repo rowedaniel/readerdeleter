@@ -2,7 +2,6 @@
  * Implements a DAFSA
  * based on this paper: https://aclanthology.org/J00-1002.pdf
  */
-
 #include <iostream>
 #include <list>
 #include <unordered_map>
@@ -15,19 +14,19 @@
 class DAFSAnode {
 public:
   bool terminal = false;
-  DAFSAnode* children[alphabet_plus_len];
+  DAFSAnode* children[alphabet_len];
 
   DAFSAnode() {
-    for(int i=0; i<alphabet_plus_len; ++i)
+    for(int i=0; i<alphabet_len; ++i)
       children[i] = NULL;
   }
 
   bool is_null_child(char c) {
-    return children[get_char_plus_num(c)] == NULL;
+    return children[get_char_num(c)] == NULL;
   }
 
   bool is_empty() {
-    for(int i=0; i<alphabet_plus_len; ++i) {
+    for(int i=0; i<alphabet_len; ++i) {
       if(children[i] != NULL)
         return false;
     }
@@ -40,7 +39,7 @@ public:
     }
 
     // transitions are the same
-    for (int i=0; i<alphabet_plus_len; ++i) {
+    for (int i=0; i<alphabet_len; ++i) {
       if(b.children[i] != a.children[i])
         return false;
     }
@@ -54,7 +53,7 @@ template <>
 struct std::hash<DAFSAnode> {
   size_t operator()(const DAFSAnode& n) const noexcept {
     size_t hash = std::hash<bool>{}(n.terminal);
-    for(int i = 0; i<alphabet_plus_len; ++i) {
+    for(int i = 0; i<alphabet_len; ++i) {
       // combine hash with hash of (i, ith child)
       hash ^= std::hash<size_t>{}(std::hash<DAFSAnode*>{}(n.children[i])*(i+1));
     }
@@ -91,7 +90,7 @@ private:
     for(auto c : word) {
       if(node == NULL)
         return NULL;
-      node = node->children[get_char_plus_num(c)];
+      node = node->children[get_char_num(c)];
     }
     return node;
   }
@@ -102,14 +101,14 @@ private:
     for (auto c : word) {
       // character not found
       auto newNode = new DAFSAnode();
-      node->children[get_char_plus_num(c)] = newNode;
+      node->children[get_char_num(c)] = newNode;
       node = newNode;
     }
     node->terminal = true;
   }
 
   int last_child_key(DAFSAnode *state) {
-    for(int i=alphabet_plus_len-1; i>=0; --i) {
+    for(int i=alphabet_len-1; i>=0; --i) {
       if(state->children[i] != NULL)
         return i;
     }
@@ -184,10 +183,10 @@ public:
       return {};
 
     std::map<char, int> node_arrows;
-    for (int i=0; i<alphabet_plus_len; ++i) {
+    for (int i=0; i<alphabet_len; ++i) {
       if(node->children[i] == NULL)
         continue;
-      node_arrows[alphabet_plus[i]] = (long int)node->children[i];
+      node_arrows[alphabet[i]] = (long int)node->children[i];
     }
     return node_arrows;
   }
