@@ -34,11 +34,11 @@ def draw_graph(dafsa: DAFSA, ax):
 def main():
     dafsa = DAFSA()
     words = [
-        "cat",
-        "cart",
-        "smart",
-        "art",
-        "bad",
+        "CAT",
+        "CART",
+        "SMART",
+        "ART",
+        "BAD",
     ]
     words.sort()
 

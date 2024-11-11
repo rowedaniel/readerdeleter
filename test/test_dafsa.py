@@ -12,44 +12,42 @@ def test_empty():
 
 def test_positive():
     dafsa = DAFSA()
-    dafsa.add_word("tests")
-    assert dafsa.is_word("tests")
+    dafsa.add_word("TESTS")
+    assert dafsa.is_word("TESTS")
 
 
 def test_negative():
     dafsa = DAFSA()
-    dafsa.add_word("tests")
+    dafsa.add_word("TESTS")
     assert not dafsa.is_word("foo")
 
 
 def test_partial():
     dafsa = DAFSA()
-    dafsa.add_word("test")
-    assert not dafsa.is_word("tests")
-    assert not dafsa.is_word("tes")
+    dafsa.add_word("TEST")
+    assert not dafsa.is_word("TESTS")
+    assert not dafsa.is_word("TES")
 
 
 def test_multiple():
     dafsa = DAFSA()
-    print("adding words")
-    dafsa.add_word("test")
-    dafsa.add_word("testes")
-    dafsa.add_word("tests")
-    dafsa.add_word("xenomorph")
-    print("\n\ntesting words")
-    assert not dafsa.is_word("tes")
-    assert dafsa.is_word("test")
-    assert dafsa.is_word("tests")
-    assert dafsa.is_word("testes")
-    assert dafsa.is_word("xenomorph")
+    dafsa.add_word("TEST")
+    dafsa.add_word("TESTES")
+    dafsa.add_word("TESTS")
+    dafsa.add_word("XENOMORPH")
+    assert not dafsa.is_word("TES")
+    assert dafsa.is_word("TEST")
+    assert dafsa.is_word("TESTS")
+    assert dafsa.is_word("TESTES")
+    assert dafsa.is_word("XENOMORPH")
 
 def test_plus():
     words = [
-        "et+sts",
-        "set+ts",
-        "t+est",
-        "t+ests",
-        "t+ests",
+        "ET@STS",
+        "SET@TS",
+        "T@EST",
+        "T@E@TS",
+        "T@ESTS",
         ]
     dafsa = DAFSA()
     for word in words:
@@ -61,7 +59,7 @@ def test_plus():
 def test_random():
     dafsa = DAFSA()
 
-    alphabet = "abcdxyz"
+    alphabet = "@ABCDXYZ"
 
     words = [
         "".join(random.choice(alphabet) for _ in range(random.randint(2, 10)))

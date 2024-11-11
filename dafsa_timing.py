@@ -5,19 +5,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from readerdeleter.build.dafsa import DAFSA
+from readerdeleter.gaddag import generate_GADDAG_words
 
-alphabet = "+abcdefghijklmnopqrstuvwxyz"
+alphabet = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
-def gen_star_up_to(n):
-    if n == 0:
-        return ""
+t = time.time()
+with open("resources/sample_wordlist_processed.txt", "r") as file:
+    words = [word.strip() for word in file.readlines() if 'z' not in word]
+    words += [(word[:random.randint(0, 9)] + 'z' + word[random.randint(0, 9):]) for word in words]
+    words += [(word[:random.randint(0, 9)] + 'z' + word[random.randint(0, 9):]) for word in words]
+    words = generate_GADDAG_words(words)
+print("generated all words from file, took", time.time() - t)
 
-    for a in alphabet:
-        if random.random() < 0.1:
-            yield a
-        for tail in gen_star_up_to(n - 1):
-            yield a + tail
+
+
+def get_words():
+    for word in words:
+        yield word
 
 
 def time_func(func):
@@ -33,17 +38,14 @@ def time_func(func):
 
 
 @time_func
-def generate_words(dafsa, limit, time_spacing, word_len=20):
+def generate_words(dafsa, limit, time_spacing):
     n = 0
-    for word in gen_star_up_to(word_len):
-        # skip half of all possible words
-        if random.random() < 0.01:
-            continue
+    for word in get_words():
         dafsa.add_word(word)
 
         n += 1
         if n % time_spacing == 0:
-            print('generated', n)
+            print('added', n)
             yield True
 
         if n >= limit:
@@ -54,9 +56,9 @@ def generate_words(dafsa, limit, time_spacing, word_len=20):
 
 
 @time_func
-def check_words(dafsa, limit, time_spacing, word_len=20):
+def check_words(dafsa, limit, time_spacing):
     n = 0
-    for word in gen_star_up_to(word_len):
+    for word in get_words():
         dafsa.is_word(word)
 
         n += 1
@@ -71,7 +73,7 @@ def check_words(dafsa, limit, time_spacing, word_len=20):
 
 def main():
 
-    n = 2000000
+    n = 1900000
     points = 400
     freq = n // points
 
