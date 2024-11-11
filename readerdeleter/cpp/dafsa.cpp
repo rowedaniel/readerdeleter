@@ -56,7 +56,7 @@ struct std::hash<DAFSAnode> {
     size_t hash = std::hash<bool>{}(n.terminal);
     for(int i = 0; i<alphabet_plus_len; ++i) {
       // combine hash with hash of (i, ith child)
-      hash ^= std::hash<size_t>{}(std::hash<DAFSAnode*>{}(n.children[i])*i);
+      hash ^= std::hash<size_t>{}(std::hash<DAFSAnode*>{}(n.children[i])*(i+1));
     }
     return hash;
   }
