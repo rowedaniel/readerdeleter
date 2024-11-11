@@ -18,12 +18,7 @@ def generate_GADDAG(words: list[str]) -> DAFSA:
     dafsa = DAFSA()
     t = time.time()
     print("adding", len(dafsa_words), "words ( starting at t =", t, ")")
-    i = 0
-    for word in dafsa_words:
-        dafsa.add_word(word)
-        i += 1
-        if i % 1000 == 0:
-            print("at", i, "time =", time.time())
+    dafsa.add_words(dafsa_words)
     dafsa.finish()
     print("done in", time.time() - t)
     return dafsa
