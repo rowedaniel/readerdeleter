@@ -100,15 +100,10 @@ private:
     // naively add the word, as if in a trie
     auto node = state;
     for (auto c : word) {
-      if (node->is_null_child(c)) {
-        // character not found
-        auto newNode = new DAFSAnode();
-        node->children[get_char_plus_num(c)] = newNode;
-        node = newNode;
-      } else {
-        // character found
-        node = node->children[get_char_plus_num(c)];
-      }
+      // character not found
+      auto newNode = new DAFSAnode();
+      node->children[get_char_plus_num(c)] = newNode;
+      node = newNode;
     }
     node->terminal = true;
   }
@@ -197,8 +192,6 @@ public:
     return node_arrows;
   }
 };
-
-int add(int a, int b) { return a + b; }
 
 namespace py = pybind11;
 
