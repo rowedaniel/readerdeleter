@@ -64,7 +64,7 @@ def test_corner1_vertical():
     assert (0, 4, 0, "SET") in valid_words
 
 def test_corner2_horizontal():
-    gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
+    gaddag = generate_GADDAG(["TEST", "SET", "TESTS", "RETEST"])
     board_data = (
             tuple("           TEST"),
             tuple("               "),
@@ -82,13 +82,14 @@ def test_corner2_horizontal():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TES", gaddag)
+    board = BoardSearch( board_data, "TESR", gaddag)
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
-    assert len(valid_words) == 3
+    assert len(valid_words) == 4
     assert (1, 0, 11, "TEST") in valid_words
     assert (1, 0, 13, "SET") in valid_words
     assert (1, 0, 14, "TEST") in valid_words
+    assert (0, 0, 9, "RETEST") in valid_words
 
 def test_corner2_vertical():
     gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
