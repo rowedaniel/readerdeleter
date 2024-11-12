@@ -143,18 +143,31 @@ private:
       out.push_back(make_tuple(node, ""));
     }
 
-    for (char c : rack_letters) {
-      int char_num = get_char_num(c);
-      if (rack_count[char_num] == 0)
+    for (int i = 1; i < alphabet_len; ++i) {
+      char c = alphabet[i];
+      // ignore blank spaces
+      if(c == '_')
         continue;
-      if (!((board_mask_row[col] >> char_num) & 0x1))
+
+      int rack_char = i;
+
+      if (rack_count[rack_char] <= 0) {
+        // check if we have any blank tiles available
+        // TODO: make it more clear that rack_count[alphabet_len] is # of blank tiles
+        if(rack_count[alphabet_len] > 0)
+          rack_char = alphabet_len;
+        else
+          continue;
+      }
+
+      if (!((board_mask_row[col] >> i) & 0x1))
         continue;
       if (node->is_null_child(c))
         continue;
-      DAFSAnode *child = node->children[get_char_num(c)];
+      DAFSAnode *child = node->children[i];
 
       // using this character, remove it from the list of allowed characters
-      --rack_count[char_num];
+      --rack_count[rack_char];
 
       // found valid letter, get further fixes
       auto fixes =
@@ -164,7 +177,7 @@ private:
 
       // finished using this character, add it back to list of allowed
       // characters
-      ++rack_count[char_num];
+      ++rack_count[rack_char];
     }
 
     return out;
@@ -209,16 +222,22 @@ private:
     /*  }*/
     /*}*/
 
-    cout << "getting prefixes" << endl;
     for (auto [n, prefix] :
          get_word_prefixes_in_row(board_mask_row, board_row, col, tree.root)) {
       int prefix_offset = 1 - prefix.length();
       cout << "got prefix: " << prefix << endl;
 
       // remove prefix items from rack
+      // TODO: figure out how blank tiles work:
+      // They should probably be represented as blank tiles?
+      // But I think they have to count not as a blank when on the board
       for (int i = 0; i < (int)prefix.length(); ++i) {
-        if (board_row[col + prefix_offset + i] == ' ')
-          --rack_count[get_char_num(prefix[i])];
+        if (board_row[col + prefix_offset + i] == ' ') {
+          int num = get_char_num(prefix[i]);
+          --rack_count[num];
+          if(rack_count[num] < 0)
+            --rack_count[alphabet_len]; // actually used a blank
+        }
       }
 
       // get child node (after delim)
@@ -232,8 +251,12 @@ private:
 
       // add prefix items back to rack for next iteration
       for (int i = 0; i < (int)prefix.length(); ++i) {
-        if (board_row[col + prefix_offset + i] == ' ')
-          ++rack_count[get_char_num(prefix[i])];
+        if (board_row[col + prefix_offset + i] == ' ') {
+          int num = get_char_num(prefix[i]);
+          ++rack_count[num];
+          if(rack_count[num] <= 0)
+            ++rack_count[alphabet_len];
+        }
       }
     }
     return out;
@@ -248,6 +271,7 @@ private:
         // skip non-anchor spaces
         if (!is_anchor(board, row, col))
           continue;
+        cout << "getting words anchored at row " << row << ", col " << col << endl;
         out.splice(out.end(),
                    get_words_in_row(board_mask[row], board[row], row, col));
       }
@@ -286,9 +310,24 @@ public:
     cross_checks(board_hori_mask, board_hori);
     cross_checks(board_vert_mask, board_vert);
 
-    for (auto c : rack)
-      ++rack_count[get_char_num(c)];
+    // TODO: figure out if I need to initialize rack
+    for(int i=0; i<alphabet_len+1; ++i)
+      rack_count[i] = 0;
+
+    for (auto c : rack) {
+      // TODO: handle blanks better
+      if(c == '_')
+        ++ rack_count[alphabet_len];
+      else
+        ++rack_count[get_char_num(c)];
+    }
+
+    cout << "rack_count = {";
+    for(int i=0; i<alphabet_len+1; ++i)
+      cout << i << ": " << rack_count[i] << ", ";
+    cout << "}" << endl;
   }
+  
 
   list<tuple<int, int, int, string>> get_valid_words() {
     /**
