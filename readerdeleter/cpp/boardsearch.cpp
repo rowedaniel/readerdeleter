@@ -91,9 +91,9 @@ private:
           }
 
           // check pivot character
-          if (node->is_null_child(delim))
+          if (!node->has_delim_child())
             continue;
-          node = node->children[get_char_num(delim)];
+          node = node->delim_child();
 
           // go down
           j = 1;
@@ -116,30 +116,31 @@ private:
     }
   }
 
-  list<tuple<DAFSAnode *, string>> get_word_prefixes_in_row(uint32_t board_mask_row[board_size],
-                                        char board_row[board_size], int col,
-                                        DAFSAnode *node) {
-    list<tuple<DAFSAnode*, string>> out = {};
+  list<tuple<DAFSAnode *, string>>
+  get_word_fixes_in_row(uint32_t board_mask_row[board_size],
+                        char board_row[board_size], int col, int step,
+                        bool (*done)(DAFSAnode *), DAFSAnode *node) {
+    list<tuple<DAFSAnode *, string>> out = {};
 
-    if (col < 0) {
-      if (!node->is_null_child(delim))
-        return {make_tuple(node->children[get_char_num(delim)], "")};
+    if (col < 0 || col >= board_size) {
+      if (done(node))
+        return {make_tuple(node, "")};
       return {};
     }
     if (board_row[col] != ' ') {
       if (node->is_null_child(board_row[col]))
         return {};
       DAFSAnode *child = node->children[get_char_num(board_row[col])];
-      auto prefixes =
-          get_word_prefixes_in_row(board_mask_row, board_row, col - 1, child);
-      for (auto [n, prefix] : prefixes) 
-        out.push_back(make_tuple(n, prefix + board_row[col]));
+      auto fixes =
+          get_word_fixes_in_row(board_mask_row, board_row, col + step, step, done, child);
+      for (auto [n, fix] : fixes)
+        out.push_back(make_tuple(n, step < 0 ? fix + board_row[col] : board_row[col] + fix));
       return out;
     }
 
-    if (!node->is_null_child(delim)) {
-      // reached end of prefix
-      out.push_back(make_tuple(node->children[get_char_num(delim)], ""));
+    if (done(node)) {
+      // reached end of fix
+      out.push_back(make_tuple(node, ""));
     }
 
     for (char c : rack_letters) {
@@ -155,12 +156,11 @@ private:
       // using this character, remove it from the list of allowed characters
       --rack_count[char_num];
 
-      // found valid letter, get further prefixes
-      auto prefixes =
-          get_word_prefixes_in_row(board_mask_row, board_row, col - 1, child);
-      for (auto [n, prefix] : prefixes)
-        out.push_back(make_tuple(n, prefix + c));
-
+      // found valid letter, get further fixes
+      auto fixes =
+          get_word_fixes_in_row(board_mask_row, board_row, col + step, step, done, child);
+      for (auto [n, fix] : fixes)
+        out.push_back(make_tuple(n, step < 0 ? fix + c : c + fix));
 
       // finished using this character, add it back to list of allowed
       // characters
@@ -170,57 +170,25 @@ private:
     return out;
   }
 
+  list<tuple<DAFSAnode *, string>>
+  get_word_prefixes_in_row(uint32_t board_mask_row[board_size],
+                           char board_row[board_size], int col,
+                           DAFSAnode *node) {
+      return get_word_fixes_in_row(board_mask_row,
+              board_row, col, -1, [](DAFSAnode* node){ return node->has_delim_child(); },
+              node);
+  }
+
   list<string> get_word_suffixes_in_row(uint32_t board_mask_row[board_size],
                                         char board_row[board_size], int col,
                                         DAFSAnode *node) {
-    list<string> out = {};
-
-    if (col >= board_size) {
-      if (node->terminal)
-        return {""};
-      return {};
-    }
-    if (board_row[col] != ' ') {
-      if (node->is_null_child(board_row[col]))
-        return {};
-      DAFSAnode *child = node->children[get_char_num(board_row[col])];
-      auto suffixes =
-          get_word_suffixes_in_row(board_mask_row, board_row, col + 1, child);
-      for (auto suffix : suffixes)
-        out.push_back(board_row[col]+suffix);
+      auto suffixes = get_word_fixes_in_row(board_mask_row,
+              board_row, col, 1, [](DAFSAnode* node){ return node->terminal; },
+              node);
+      list<string> out = {};
+      for(auto [n, s] : suffixes)
+          out.push_back(s);
       return out;
-    }
-
-    // space is unfilled
-    // check if terminal
-    if(node->terminal)
-      out.push_back("");
-
-    for (char c : rack_letters) {
-      int char_num = get_char_num(c);
-      if (rack_count[char_num] == 0)
-        continue;
-      if (!((board_mask_row[col] >> char_num) & 0x1))
-        continue;
-      if (node->is_null_child(c))
-        continue;
-      DAFSAnode *child = node->children[get_char_num(c)];
-
-      // using this character, remove it from the list of allowed characters
-      --rack_count[char_num];
-
-      // found valid letter, get further suffixes
-      auto suffixes =
-          get_word_suffixes_in_row(board_mask_row, board_row, col + 1, child);
-      for (auto suffix : suffixes)
-        out.push_back(c+suffix);
-
-      // finished using this character, add it back to list of allowed
-      // characters
-      ++rack_count[char_num];
-    }
-
-    return out;
   }
 
   list<tuple<int, int, string>>
@@ -230,7 +198,8 @@ private:
 
     // TODO: implement this correctly
     // first check if there's a prior anchor point connected by words
-    // (in which case we've already got all words, so this computation is wasted)
+    // (in which case we've already got all words, so this computation is
+    // wasted)
     /*if(col > 0 && board_row[col-1] != ' ') {*/
     /*  for(int i=1; i>0; --i) {*/
     /*    if(is_anchor_in_row(board_row, col-i)) {*/
@@ -240,7 +209,6 @@ private:
     /*  }*/
     /*}*/
 
-
     cout << "getting prefixes" << endl;
     for (auto [n, prefix] :
          get_word_prefixes_in_row(board_mask_row, board_row, col, tree.root)) {
@@ -248,18 +216,23 @@ private:
       cout << "got prefix: " << prefix << endl;
 
       // remove prefix items from rack
-      for(int i=0; i<(int)prefix.length(); ++i) {
-        if(board_row[col+prefix_offset+i] == ' ')
+      for (int i = 0; i < (int)prefix.length(); ++i) {
+        if (board_row[col + prefix_offset + i] == ' ')
           --rack_count[get_char_num(prefix[i])];
       }
 
-      list<string> suffixes = get_word_suffixes_in_row(board_mask_row, board_row, col+1, n);
-      for(string suffix : suffixes)
-          out.push_back(make_tuple(row, col - prefix.length() + 1, prefix+suffix));
+      // get child node (after delim)
+      DAFSAnode* child = n->delim_child();
+
+      list<string> suffixes =
+          get_word_suffixes_in_row(board_mask_row, board_row, col + 1, child);
+      for (string suffix : suffixes)
+        out.push_back(
+            make_tuple(row, col - prefix.length() + 1, prefix + suffix));
 
       // add prefix items back to rack for next iteration
-      for(int i=0; i<(int)prefix.length(); ++i) {
-        if(board_row[col+prefix_offset+i] == ' ')
+      for (int i = 0; i < (int)prefix.length(); ++i) {
+        if (board_row[col + prefix_offset + i] == ' ')
           ++rack_count[get_char_num(prefix[i])];
       }
     }
@@ -311,11 +284,10 @@ public:
     }
 
     cross_checks(board_hori_mask, board_hori);
-    cross_checks(board_vert_mask, board_vert); 
+    cross_checks(board_vert_mask, board_vert);
 
     for (auto c : rack)
       ++rack_count[get_char_num(c)];
-
   }
 
   list<tuple<int, int, int, string>> get_valid_words() {
@@ -325,10 +297,10 @@ public:
      */
 
     list<tuple<int, int, int, string>> words = {};
-    for(auto [r, c, w] : get_words(board_hori_mask, board_hori)) {
+    for (auto [r, c, w] : get_words(board_hori_mask, board_hori)) {
       words.push_back(make_tuple(0, r, c, w));
     }
-    for(auto [c, r, w] : get_words(board_vert_mask, board_vert)) {
+    for (auto [c, r, w] : get_words(board_vert_mask, board_vert)) {
       words.push_back(make_tuple(1, r, c, w));
     }
     return words;

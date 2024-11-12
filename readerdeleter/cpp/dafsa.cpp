@@ -25,6 +25,14 @@ public:
     return children[get_char_num(c)] == NULL;
   }
 
+  bool has_delim_child() {
+      return children[0] != NULL;
+  }
+
+  DAFSAnode* delim_child() {
+      return children[0];
+  }
+
   bool is_empty() {
     for(int i=0; i<alphabet_len; ++i) {
       if(children[i] != NULL)
