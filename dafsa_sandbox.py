@@ -9,11 +9,7 @@ def print_board(b):
         print(f'{i:<3} ' + ''.join(row))
 
 
-print("reading file")
-t = time.time()
-with open("resources/sample_wordlist_processed.txt", "r") as file:
-    words = [word.strip() for word in file.readlines()]
-print("took", time.time() - t)
+words = ["hunch", "hunched"]
 
 
 print("generating gaddag")
@@ -28,7 +24,7 @@ board_data = (
         tuple("               "),
         tuple("               "),
         tuple("               "),
-        tuple("   hunched     "),
+        tuple("   HUNCH       "),
         tuple("               "),
         tuple("               "),
         tuple("               "),
@@ -42,7 +38,7 @@ board_data = (
 
 print("generating boardsearch")
 t = time.time()
-board = BoardSearch( board_data, "hurtfuld", gaddag)
+board = BoardSearch( board_data, "ED", gaddag)
 print("took", time.time() - t)
 
 
