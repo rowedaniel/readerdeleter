@@ -104,7 +104,7 @@ private:
             node = node->children[get_char_num(board[row + j][col])];
             ++j;
           }
-          if (board[row + j][col] != ' ') {
+          if (board[row + j][col] != ' ' || !node->terminal) {
             // couldn't find a valid word before end of suffix
             continue;
           }
