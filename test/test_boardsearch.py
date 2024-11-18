@@ -120,6 +120,76 @@ def test_corner2_vertical():
     assert (0, 3, 11, "TEST") in valid_words
     assert (0, 3, 12, "SET") in valid_words
 
+def test_hook_hang():
+    gaddag = generate_GADDAG(["AAAA", "AB", "BA", "BBCB"])
+    board_data = (
+            tuple("               "),
+            tuple("AAAA           "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+    board = BoardSearch( board_data, "BBBC", gaddag)
+    valid_words = list(set(board.get_valid_words()))
+    print(valid_words)
+    assert len(valid_words) == 12
+    assert (0, 0, 2, "BBCB") in valid_words
+    assert (0, 0, 3, "BBCB") in valid_words
+    assert (0, 2, 2, "BBCB") in valid_words
+    assert (0, 2, 3, "BBCB") in valid_words
+    assert (1, 0, 0, "BA") in valid_words
+    assert (1, 0, 1, "BA") in valid_words
+    assert (1, 0, 2, "BA") in valid_words
+    assert (1, 0, 3, "BA") in valid_words
+    assert (1, 1, 0, "AB") in valid_words
+    assert (1, 1, 1, "AB") in valid_words
+    assert (1, 1, 2, "AB") in valid_words
+    assert (1, 1, 3, "AB") in valid_words
+
+def test_hook_stop():
+    gaddag = generate_GADDAG(["AAAC", "AB", "BA", "CC", "BBC"])
+    board_data = (
+            tuple("               "),
+            tuple("AAAC           "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+    board = BoardSearch( board_data, "BBC", gaddag)
+    valid_words = list(set(board.get_valid_words()))
+    print(valid_words)
+    assert len(valid_words) == 10
+    assert (0, 0, 1, "BBC") in valid_words
+    assert (0, 2, 1, "BBC") in valid_words
+    assert (1, 0, 0, "BA") in valid_words
+    assert (1, 0, 1, "BA") in valid_words
+    assert (1, 0, 2, "BA") in valid_words
+    assert (1, 0, 3, "CC") in valid_words
+    assert (1, 1, 0, "AB") in valid_words
+    assert (1, 1, 1, "AB") in valid_words
+    assert (1, 1, 2, "AB") in valid_words
+    assert (1, 1, 3, "CC") in valid_words
+
 def test_central():
     gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
     board_data = (
