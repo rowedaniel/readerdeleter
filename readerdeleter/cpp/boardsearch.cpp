@@ -204,6 +204,30 @@ private:
       return out;
   }
 
+  inline void decrement_rack_cout(char board_row[board_size], int col, string prefix) {
+      int prefix_offset = 1 - prefix.length();
+      for (int i = 0; i < (int)prefix.length(); ++i) {
+        if (board_row[col + prefix_offset + i] == ' ') {
+          int num = get_char_num(prefix[i]);
+          --rack_count[num];
+          if(rack_count[num] < 0)
+            --rack_count[alphabet_len]; // actually used a blank
+        }
+      }
+  }
+
+  inline void increment_rack_count(char board_row[board_size], int col, string prefix) {
+      int prefix_offset = 1 - prefix.length();
+      for (int i = 0; i < (int)prefix.length(); ++i) {
+        if (board_row[col + prefix_offset + i] == ' ') {
+          int num = get_char_num(prefix[i]);
+          ++rack_count[num];
+          if(rack_count[num] <= 0)
+            ++rack_count[alphabet_len];
+        }
+      }
+  }
+
   list<tuple<int, int, string>>
   get_words_in_row(uint32_t board_mask_row[board_size],
                    char board_row[board_size], int row, int col) {
@@ -224,21 +248,13 @@ private:
 
     for (auto [n, prefix] :
          get_word_prefixes_in_row(board_mask_row, board_row, col, tree.root)) {
-      int prefix_offset = 1 - prefix.length();
       cout << "got prefix: " << prefix << endl;
 
       // remove prefix items from rack
       // TODO: figure out how blank tiles work:
       // They should probably be represented as blank tiles?
       // But I think they have to count not as a blank when on the board
-      for (int i = 0; i < (int)prefix.length(); ++i) {
-        if (board_row[col + prefix_offset + i] == ' ') {
-          int num = get_char_num(prefix[i]);
-          --rack_count[num];
-          if(rack_count[num] < 0)
-            --rack_count[alphabet_len]; // actually used a blank
-        }
-      }
+      decrement_rack_cout(board_row, col, prefix);
 
       // get child node (after delim)
       DAFSAnode* child = n->delim_child();
@@ -250,14 +266,7 @@ private:
             make_tuple(row, col - prefix.length() + 1, prefix + suffix));
 
       // add prefix items back to rack for next iteration
-      for (int i = 0; i < (int)prefix.length(); ++i) {
-        if (board_row[col + prefix_offset + i] == ' ') {
-          int num = get_char_num(prefix[i]);
-          ++rack_count[num];
-          if(rack_count[num] <= 0)
-            ++rack_count[alphabet_len];
-        }
-      }
+      increment_rack_count(board_row, col, prefix);
     }
     return out;
   }
