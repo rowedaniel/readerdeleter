@@ -134,8 +134,10 @@ private:
       auto fixes = get_word_fixes_in_row(board_mask_row, board_row, col + step,
                                          step, done, child);
       for (auto [n, fix] : fixes)
-        out.push_back(make_tuple(n, step < 0 ? fix + board_row[col]
-                                             : board_row[col] + fix));
+        out.push_back(make_tuple(
+            n, step < 0 ? fix + '.'
+                        : '.' + fix)); // '.' represents a tile that was already
+                                       // on the board prior
       return out;
     }
 
@@ -152,6 +154,8 @@ private:
 
       int rack_char = i;
 
+      // TODO: move rack input from constructor into get_valid_words, so that
+      // it's easier to update board in future.
       if (rack_count[rack_char] <= 0) {
         // check if we have any blank tiles available
         // TODO: make it more clear that rack_count[alphabet_len] is # of blank

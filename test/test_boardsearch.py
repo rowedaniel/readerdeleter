@@ -28,10 +28,10 @@ def test_corner1_horizontal():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 5
-    assert (0, 0, 0, "TESTS") in valid_words
-    assert (1, 0, 0, "TEST") in valid_words
-    assert (1, 0, 2, "SET") in valid_words
-    assert (1, 0, 3, "TEST") in valid_words
+    assert (0, 0, 0, "....S") in valid_words
+    assert (1, 0, 0, ".EST") in valid_words
+    assert (1, 0, 2, ".ET") in valid_words
+    assert (1, 0, 3, ".EST") in valid_words
     assert (1, 0, 4, "SET") in valid_words
 
 def test_corner1_vertical():
@@ -57,10 +57,10 @@ def test_corner1_vertical():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 5
-    assert (1, 0, 0, "TESTS") in valid_words
-    assert (0, 0, 0, "TEST") in valid_words
-    assert (0, 2, 0, "SET") in valid_words
-    assert (0, 3, 0, "TEST") in valid_words
+    assert (1, 0, 0, "....S") in valid_words
+    assert (0, 0, 0, ".EST") in valid_words
+    assert (0, 2, 0, ".ET") in valid_words
+    assert (0, 3, 0, ".EST") in valid_words
     assert (0, 4, 0, "SET") in valid_words
 
 def test_corner2_horizontal():
@@ -86,12 +86,13 @@ def test_corner2_horizontal():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 4
-    assert (1, 0, 11, "TEST") in valid_words
-    assert (1, 0, 13, "SET") in valid_words
-    assert (1, 0, 14, "TEST") in valid_words
-    assert (0, 0, 9, "RETEST") in valid_words
+    assert (1, 0, 11, ".EST") in valid_words
+    assert (1, 0, 13, ".ET") in valid_words
+    assert (1, 0, 14, ".EST") in valid_words
+    assert (0, 0, 9, "RE....") in valid_words
 
 def test_corner2_vertical():
+    # TODO: sometimes segfaults--figure out why
     gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
     board_data = (
             tuple("              T"),
@@ -114,11 +115,11 @@ def test_corner2_vertical():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 5
-    assert (1, 0, 14, "TESTS") in valid_words
-    assert (0, 0, 11, "TEST") in valid_words
-    assert (0, 0, 12, "SET") in valid_words
-    assert (0, 3, 11, "TEST") in valid_words
-    assert (0, 3, 12, "SET") in valid_words
+    assert (1, 0, 14, "....S") in valid_words
+    assert (0, 0, 11, "TES.") in valid_words
+    assert (0, 0, 12, "SE.") in valid_words
+    assert (0, 3, 11, "TES.") in valid_words
+    assert (0, 3, 12, "SE.") in valid_words
 
 def test_hook_hang():
     gaddag = generate_GADDAG(["AAAA", "AB", "BA", "BBCB"])
@@ -147,14 +148,14 @@ def test_hook_hang():
     assert (0, 0, 3, "BBCB") in valid_words
     assert (0, 2, 2, "BBCB") in valid_words
     assert (0, 2, 3, "BBCB") in valid_words
-    assert (1, 0, 0, "BA") in valid_words
-    assert (1, 0, 1, "BA") in valid_words
-    assert (1, 0, 2, "BA") in valid_words
-    assert (1, 0, 3, "BA") in valid_words
-    assert (1, 1, 0, "AB") in valid_words
-    assert (1, 1, 1, "AB") in valid_words
-    assert (1, 1, 2, "AB") in valid_words
-    assert (1, 1, 3, "AB") in valid_words
+    assert (1, 0, 0, "B.") in valid_words
+    assert (1, 0, 1, "B.") in valid_words
+    assert (1, 0, 2, "B.") in valid_words
+    assert (1, 0, 3, "B.") in valid_words
+    assert (1, 1, 0, ".B") in valid_words
+    assert (1, 1, 1, ".B") in valid_words
+    assert (1, 1, 2, ".B") in valid_words
+    assert (1, 1, 3, ".B") in valid_words
 
 def test_hook_stop():
     gaddag = generate_GADDAG(["AAAC", "AB", "BA", "CC", "BBC"])
@@ -181,14 +182,14 @@ def test_hook_stop():
     assert len(valid_words) == 10
     assert (0, 0, 1, "BBC") in valid_words
     assert (0, 2, 1, "BBC") in valid_words
-    assert (1, 0, 0, "BA") in valid_words
-    assert (1, 0, 1, "BA") in valid_words
-    assert (1, 0, 2, "BA") in valid_words
-    assert (1, 0, 3, "CC") in valid_words
-    assert (1, 1, 0, "AB") in valid_words
-    assert (1, 1, 1, "AB") in valid_words
-    assert (1, 1, 2, "AB") in valid_words
-    assert (1, 1, 3, "CC") in valid_words
+    assert (1, 0, 0, "B.") in valid_words
+    assert (1, 0, 1, "B.") in valid_words
+    assert (1, 0, 2, "B.") in valid_words
+    assert (1, 0, 3, "C.") in valid_words
+    assert (1, 1, 0, ".B") in valid_words
+    assert (1, 1, 1, ".B") in valid_words
+    assert (1, 1, 2, ".B") in valid_words
+    assert (1, 1, 3, ".C") in valid_words
 
 def test_central():
     gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
@@ -213,16 +214,16 @@ def test_central():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 10
-    assert (0, 3, 4, "SET") in valid_words
-    assert (0, 3, 3, "TEST") in valid_words
-    assert (0, 3, 6, "TEST") in valid_words
-    assert (0, 4, 5, "SET") in valid_words
-    assert (0, 5, 6, "SET") in valid_words
-    assert (0, 6, 4, "SET") in valid_words
-    assert (0, 6, 3, "TEST") in valid_words
-    assert (0, 6, 6, "TEST") in valid_words
+    assert (0, 3, 4, "SE.") in valid_words
+    assert (0, 3, 3, "TES.") in valid_words
+    assert (0, 3, 6, ".EST") in valid_words
+    assert (0, 4, 5, "S.T") in valid_words
+    assert (0, 5, 6, ".ET") in valid_words
+    assert (0, 6, 4, "SE.") in valid_words
+    assert (0, 6, 3, "TES.") in valid_words
+    assert (0, 6, 6, ".EST") in valid_words
     assert (0, 7, 6, "SET") in valid_words
-    assert (1, 3, 6, "TESTS") in valid_words
+    assert (1, 3, 6, "....S") in valid_words
 
 def test_blank_small():
     gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
@@ -247,7 +248,7 @@ def test_blank_small():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 1
-    assert (1, 3, 6, "TESTS") in valid_words
+    assert (1, 3, 6, "....S") in valid_words
 
 def test_blank_big():
     gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
@@ -272,14 +273,14 @@ def test_blank_big():
     valid_words = list(set(board.get_valid_words()))
     print(valid_words)
     assert len(valid_words) == 11
-    assert (0, 3, 4, "SET") in valid_words
-    assert (0, 3, 3, "TEST") in valid_words
-    assert (0, 3, 6, "TEST") in valid_words
-    assert (0, 4, 5, "SET") in valid_words
-    assert (0, 5, 6, "SET") in valid_words
-    assert (0, 5, 4, "TEST") in valid_words
-    assert (0, 6, 4, "SET") in valid_words
-    assert (0, 6, 3, "TEST") in valid_words
-    assert (0, 6, 6, "TEST") in valid_words
+    assert (0, 3, 4, "SE.") in valid_words
+    assert (0, 3, 3, "TES.") in valid_words
+    assert (0, 3, 6, ".EST") in valid_words
+    assert (0, 4, 5, "S.T") in valid_words
+    assert (0, 5, 6, ".ET") in valid_words
+    assert (0, 5, 4, "TE.T") in valid_words
+    assert (0, 6, 4, "SE.") in valid_words
+    assert (0, 6, 3, "TES.") in valid_words
+    assert (0, 6, 6, ".EST") in valid_words
     assert (0, 7, 6, "SET") in valid_words
-    assert (1, 3, 6, "TESTS") in valid_words
+    assert (1, 3, 6, "....S") in valid_words
