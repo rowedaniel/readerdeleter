@@ -131,10 +131,11 @@ private:
       if (node->is_null_child(board_row[col]))
         return {};
       DAFSAnode *child = node->children[get_char_num(board_row[col])];
-      auto fixes =
-          get_word_fixes_in_row(board_mask_row, board_row, col + step, step, done, child);
+      auto fixes = get_word_fixes_in_row(board_mask_row, board_row, col + step,
+                                         step, done, child);
       for (auto [n, fix] : fixes)
-        out.push_back(make_tuple(n, step < 0 ? fix + board_row[col] : board_row[col] + fix));
+        out.push_back(make_tuple(n, step < 0 ? fix + board_row[col]
+                                             : board_row[col] + fix));
       return out;
     }
 
@@ -146,15 +147,16 @@ private:
     for (int i = 1; i < alphabet_len; ++i) {
       char c = alphabet[i];
       // ignore blank spaces
-      if(c == '_')
+      if (c == '_')
         continue;
 
       int rack_char = i;
 
       if (rack_count[rack_char] <= 0) {
         // check if we have any blank tiles available
-        // TODO: make it more clear that rack_count[alphabet_len] is # of blank tiles
-        if(rack_count[alphabet_len] > 0)
+        // TODO: make it more clear that rack_count[alphabet_len] is # of blank
+        // tiles
+        if (rack_count[alphabet_len] > 0)
           rack_char = alphabet_len;
         else
           continue;
@@ -170,8 +172,8 @@ private:
       --rack_count[rack_char];
 
       // found valid letter, get further fixes
-      auto fixes =
-          get_word_fixes_in_row(board_mask_row, board_row, col + step, step, done, child);
+      auto fixes = get_word_fixes_in_row(board_mask_row, board_row, col + step,
+                                         step, done, child);
       for (auto [n, fix] : fixes)
         out.push_back(make_tuple(n, step < 0 ? fix + c : c + fix));
 
@@ -187,45 +189,47 @@ private:
   get_word_prefixes_in_row(uint32_t board_mask_row[board_size],
                            char board_row[board_size], int col,
                            DAFSAnode *node) {
-      return get_word_fixes_in_row(board_mask_row,
-              board_row, col, -1, [](DAFSAnode* node){ return node->has_delim_child(); },
-              node);
+    return get_word_fixes_in_row(
+        board_mask_row, board_row, col, -1,
+        [](DAFSAnode *node) { return node->has_delim_child(); }, node);
   }
 
   list<string> get_word_suffixes_in_row(uint32_t board_mask_row[board_size],
                                         char board_row[board_size], int col,
                                         DAFSAnode *node) {
-      auto suffixes = get_word_fixes_in_row(board_mask_row,
-              board_row, col, 1, [](DAFSAnode* node){ return node->terminal; },
-              node);
-      list<string> out = {};
-      for(auto [n, s] : suffixes)
-          out.push_back(s);
-      return out;
+    auto suffixes = get_word_fixes_in_row(
+        board_mask_row, board_row, col, 1,
+        [](DAFSAnode *node) { return node->terminal; }, node);
+    list<string> out = {};
+    for (auto [n, s] : suffixes)
+      out.push_back(s);
+    return out;
   }
 
-  inline void decrement_rack_cout(char board_row[board_size], int col, string prefix) {
-      int prefix_offset = 1 - prefix.length();
-      for (int i = 0; i < (int)prefix.length(); ++i) {
-        if (board_row[col + prefix_offset + i] == ' ') {
-          int num = get_char_num(prefix[i]);
-          --rack_count[num];
-          if(rack_count[num] < 0)
-            --rack_count[alphabet_len]; // actually used a blank
-        }
+  inline void decrement_rack_cout(char board_row[board_size], int col,
+                                  string prefix) {
+    int prefix_offset = 1 - prefix.length();
+    for (int i = 0; i < (int)prefix.length(); ++i) {
+      if (board_row[col + prefix_offset + i] == ' ') {
+        int num = get_char_num(prefix[i]);
+        --rack_count[num];
+        if (rack_count[num] < 0)
+          --rack_count[alphabet_len]; // actually used a blank
       }
+    }
   }
 
-  inline void increment_rack_count(char board_row[board_size], int col, string prefix) {
-      int prefix_offset = 1 - prefix.length();
-      for (int i = 0; i < (int)prefix.length(); ++i) {
-        if (board_row[col + prefix_offset + i] == ' ') {
-          int num = get_char_num(prefix[i]);
-          ++rack_count[num];
-          if(rack_count[num] <= 0)
-            ++rack_count[alphabet_len];
-        }
+  inline void increment_rack_count(char board_row[board_size], int col,
+                                   string prefix) {
+    int prefix_offset = 1 - prefix.length();
+    for (int i = 0; i < (int)prefix.length(); ++i) {
+      if (board_row[col + prefix_offset + i] == ' ') {
+        int num = get_char_num(prefix[i]);
+        ++rack_count[num];
+        if (rack_count[num] <= 0)
+          ++rack_count[alphabet_len];
       }
+    }
   }
 
   list<tuple<int, int, string>>
@@ -257,7 +261,7 @@ private:
       decrement_rack_cout(board_row, col, prefix);
 
       // get child node (after delim)
-      DAFSAnode* child = n->delim_child();
+      DAFSAnode *child = n->delim_child();
 
       list<string> suffixes =
           get_word_suffixes_in_row(board_mask_row, board_row, col + 1, child);
@@ -280,7 +284,8 @@ private:
         // skip non-anchor spaces
         if (!is_anchor(board, row, col))
           continue;
-        cout << "getting words anchored at row " << row << ", col " << col << endl;
+        cout << "getting words anchored at row " << row << ", col " << col
+             << endl;
         out.splice(out.end(),
                    get_words_in_row(board_mask[row], board[row], row, col));
       }
@@ -320,23 +325,22 @@ public:
     cross_checks(board_vert_mask, board_vert);
 
     // TODO: figure out if I need to initialize rack
-    for(int i=0; i<alphabet_len+1; ++i)
+    for (int i = 0; i < alphabet_len + 1; ++i)
       rack_count[i] = 0;
 
     for (auto c : rack) {
       // TODO: handle blanks better
-      if(c == '_')
-        ++ rack_count[alphabet_len];
+      if (c == '_')
+        ++rack_count[alphabet_len];
       else
         ++rack_count[get_char_num(c)];
     }
 
     cout << "rack_count = {";
-    for(int i=0; i<alphabet_len+1; ++i)
+    for (int i = 0; i < alphabet_len + 1; ++i)
       cout << i << ": " << rack_count[i] << ", ";
     cout << "}" << endl;
   }
-  
 
   list<tuple<int, int, int, string>> get_valid_words() {
     /**
