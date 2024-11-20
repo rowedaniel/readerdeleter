@@ -1,5 +1,5 @@
 import time
-from readerdeleter.build.dafsa import DAFSA
+from .build.dafsa import DAFSA
 
 def generate_GADDAG_words(words: list[str]) -> list[str]:
     dafsa_words = [
