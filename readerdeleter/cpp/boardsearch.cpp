@@ -97,14 +97,15 @@ private:
 
           // go down
           j = 1;
-          while (row + j >= 0 && board[row + j][col] != ' ') {
+          while (row + j < board_size && board[row + j][col] != ' ') {
             if (node->is_null_child(board[row + j][col])) {
               break;
             }
             node = node->children[get_char_num(board[row + j][col])];
             ++j;
           }
-          if (board[row + j][col] != ' ' || !node->terminal) {
+          if ((row + j < board_size && board[row + j][col] != ' ') ||
+              !node->terminal) {
             // couldn't find a valid word before end of suffix
             continue;
           }
@@ -344,6 +345,7 @@ public:
     for (int i = 0; i < alphabet_len + 1; ++i)
       cout << i << ": " << rack_count[i] << ", ";
     cout << "}" << endl;
+
   }
 
   list<tuple<int, int, int, string>> get_valid_words() {
