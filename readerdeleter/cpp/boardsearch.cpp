@@ -211,7 +211,7 @@ private:
     return out;
   }
 
-  inline void decrement_rack_cout(char board_row[board_size], int col,
+  inline void decrement_rack_count(char board_row[board_size], int col,
                                   string prefix) {
     int prefix_offset = 1 - prefix.length();
     for (int i = 0; i < (int)prefix.length(); ++i) {
@@ -263,7 +263,7 @@ private:
       // TODO: figure out how blank tiles work:
       // They should probably be represented as blank tiles?
       // But I think they have to count not as a blank when on the board
-      decrement_rack_cout(board_row, col, prefix);
+      decrement_rack_count(board_row, col, prefix);
 
       // get child node (after delim)
       DAFSAnode *child = n->delim_child();
