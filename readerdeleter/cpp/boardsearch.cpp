@@ -257,7 +257,6 @@ private:
 
     for (auto [n, prefix] :
          get_word_prefixes_in_row(board_mask_row, board_row, col, tree.root)) {
-      cout << "got prefix: " << prefix << endl;
 
       // remove prefix items from rack
       // TODO: figure out how blank tiles work:
@@ -289,8 +288,6 @@ private:
         // skip non-anchor spaces
         if (!is_anchor(board, row, col))
           continue;
-        cout << "getting words anchored at row " << row << ", col " << col
-             << endl;
         out.splice(out.end(),
                    get_words_in_row(board_mask[row], board[row], row, col));
       }
@@ -340,11 +337,6 @@ public:
       else
         ++rack_count[get_char_num(c)];
     }
-
-    cout << "rack_count = {";
-    for (int i = 0; i < alphabet_len + 1; ++i)
-      cout << i << ": " << rack_count[i] << ", ";
-    cout << "}" << endl;
 
   }
 
