@@ -30,7 +30,12 @@ private:
   board_t board_hori;
   board_t board_vert;
 
+  bool is_empty;
+
   bool is_anchor(board_t board, int row, int col) {
+    if(is_empty) {
+        return (row == board_size / 2) && (col == board_size / 2);
+    }
     return board[row][col] == ' ' &&
            ((row - 1 >= 0 && board[row - 1][col] != ' ') ||
             (col - 1 >= 0 && board[row][col - 1] != ' ') ||
@@ -44,6 +49,8 @@ private:
   }
 
   bool is_anchor_in_row(char board_row[board_size], int col) {
+    if(is_empty)
+        return col == board_size / 2 + 1;
     return ((col - 1 >= 0 && board_row[col] != ' ') ||
             (col + 1 < board_size && board_row[col] != ' '));
   }
@@ -308,10 +315,14 @@ public:
     rack_letters = rack;
 
     // getup transpose of board
+    is_empty = true;
     for (int row = 0; row < board_size; ++row) {
       for (int col = 0; col < board_size; ++col) {
         board_hori[row][col] = board[row][col];
         board_vert[row][col] = board[col][row];
+        if(board[row][col] != ' ') {
+            is_empty = false;
+        }
       }
     }
 

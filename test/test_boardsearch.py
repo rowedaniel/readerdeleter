@@ -1,5 +1,3 @@
-import random
-
 from readerdeleter.gaddag import generate_GADDAG
 from readerdeleter.build.boardsearch import BoardSearch
 
@@ -284,3 +282,30 @@ def test_blank_big():
     assert (0, 6, 6, ".EST") in valid_words
     assert (0, 7, 6, "SET") in valid_words
     assert (1, 3, 6, "....S") in valid_words
+
+
+def test_empty_firstturn():
+    gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
+    board_data = (
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+    board = BoardSearch( board_data, "SET", gaddag)
+    valid_words = list(set(board.get_valid_words()))
+    print(valid_words)
+    assert len(valid_words) == 6
+
+
