@@ -22,8 +22,8 @@ def test_corner1_horizontal():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TES", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("TES")))
     print(valid_words)
     assert len(valid_words) == 5
     assert (0, 0, 0, "....S") in valid_words
@@ -51,8 +51,8 @@ def test_corner1_vertical():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TES", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("TES")))
     print(valid_words)
     assert len(valid_words) == 5
     assert (1, 0, 0, "....S") in valid_words
@@ -80,8 +80,8 @@ def test_corner2_horizontal():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TESR", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("TESR")))
     print(valid_words)
     assert len(valid_words) == 4
     assert (1, 0, 11, ".EST") in valid_words
@@ -109,8 +109,8 @@ def test_corner2_vertical():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TES", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("TES")))
     print(valid_words)
     assert len(valid_words) == 5
     assert (1, 0, 14, "....S") in valid_words
@@ -138,8 +138,8 @@ def test_hook_hang():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "BBBC", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("BBBC")))
     print(valid_words)
     assert len(valid_words) == 12
     assert (0, 0, 2, "BBCB") in valid_words
@@ -174,8 +174,8 @@ def test_hook_stop():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "BBC", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("BBC")))
     print(valid_words)
     assert len(valid_words) == 10
     assert (0, 0, 1, "BBC") in valid_words
@@ -208,8 +208,8 @@ def test_central():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TES", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("TES")))
     print(valid_words)
     assert len(valid_words) == 10
     assert (0, 3, 4, "SE.") in valid_words
@@ -242,8 +242,8 @@ def test_blank_small():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "_", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("_")))
     print(valid_words)
     assert len(valid_words) == 1
     assert (1, 3, 6, "....S") in valid_words
@@ -267,8 +267,8 @@ def test_blank_big():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "TE_", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("TE_")))
     print(valid_words)
     assert len(valid_words) == 11
     assert (0, 3, 4, "SE.") in valid_words
@@ -303,8 +303,8 @@ def test_empty_firstturn():
             tuple("               "),
             tuple("               "),
         )
-    board = BoardSearch( board_data, "SET", gaddag)
-    valid_words = list(set(board.get_valid_words()))
+    board = BoardSearch( board_data, gaddag)
+    valid_words = list(set(board.get_valid_words("SET")))
     print(valid_words)
     assert len(valid_words) == 6
 

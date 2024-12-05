@@ -23,7 +23,6 @@ private:
   DAFSA tree;
   // count of every tile, plus blank tiles
   int rack_count[alphabet_len + 1] = {0};
-  string rack_letters;
   uint32_t board_hori_mask[board_size][board_size];
   uint32_t board_vert_mask[board_size][board_size];
 
@@ -31,6 +30,20 @@ private:
   board_t board_vert;
 
   bool is_empty;
+
+  void init_rack(string rack) {
+    // TODO: figure out if I need to initialize rack
+    for (int i = 0; i < alphabet_len + 1; ++i)
+      rack_count[i] = 0;
+
+    for (auto c : rack) {
+      // TODO: handle blanks better
+      if (c == '_')
+        ++rack_count[alphabet_len];
+      else
+        ++rack_count[get_char_num(c)];
+    }
+  }
 
   bool is_anchor(board_t board, int row, int col) {
     if (is_empty) {
@@ -303,16 +316,15 @@ private:
   }
 
 public:
-  BoardSearch(array<array<char, board_size>, board_size> board, string rack,
+  BoardSearch(array<array<char, board_size>, board_size> board,
               DAFSA &wordlist) {
     /**
-     * Setup to search board board, given rack rack and wordlist wordlist.
+     * Setup to search board board, given wordlist and board.
      * Note that wordlist should be formatted as a GADDAG
      */
 
     // set necessary vars
     tree = wordlist;
-    rack_letters = rack;
 
     // getup transpose of board
     is_empty = true;
@@ -336,25 +348,15 @@ public:
 
     cross_checks(board_hori_mask, board_hori);
     cross_checks(board_vert_mask, board_vert);
-
-    // TODO: figure out if I need to initialize rack
-    for (int i = 0; i < alphabet_len + 1; ++i)
-      rack_count[i] = 0;
-
-    for (auto c : rack) {
-      // TODO: handle blanks better
-      if (c == '_')
-        ++rack_count[alphabet_len];
-      else
-        ++rack_count[get_char_num(c)];
-    }
   }
 
-  list<tuple<int, int, int, string>> get_valid_words() {
+  list<tuple<int, int, int, string>> get_valid_words(string rack) {
     /**
      * Returns list of valid words, in format:
      * (start x, start y, left/right, word, score)
      */
+
+    init_rack(rack);
 
     list<tuple<int, int, int, string>> words = {};
     for (auto [r, c, w] : get_words(board_hori_mask, board_hori)) {
@@ -373,7 +375,6 @@ PYBIND11_MODULE(boardsearch, m) {
   m.doc() = "Effecient wordfinding algorithm for SCRABBLE in C++";
 
   py::class_<BoardSearch>(m, "BoardSearch")
-      .def(py::init<array<array<char, board_size>, board_size>, string,
-                    DAFSA &>())
+      .def(py::init<array<array<char, board_size>, board_size>, DAFSA &>())
       .def("get_valid_words", &BoardSearch::get_valid_words);
 }

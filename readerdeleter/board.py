@@ -62,6 +62,7 @@ class Board:
         else:
             self.letters = letters
         self.blank = [[False for _ in range(self.size)] for _ in range(self.size)]
+        self.searcher = BoardSearch([tuple(row) for row in self.letters], self.gaddag)
 
         # lowercase = letter, UPPERCASE = word
         # t = triple, d = double
@@ -172,9 +173,7 @@ class Board:
         (direction, row, column, literal word, word with blanks explicit)
         """
         # TODO: score words
-        board_data = [tuple(row) for row in self.letters]
-        board = BoardSearch(board_data, rack, self.gaddag)
-        valid_word_plays = list(set(board.get_valid_words()))
+        valid_word_plays = list(set(self.searcher.get_valid_words(rack)))
         return self.get_blank_positions(rack, valid_word_plays)
 
     def auxiliary_score(self, row: int, col: int, char: str, direction: bool):
