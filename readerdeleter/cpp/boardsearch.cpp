@@ -33,8 +33,8 @@ private:
   bool is_empty;
 
   bool is_anchor(board_t board, int row, int col) {
-    if(is_empty) {
-        return (row == board_size / 2) && (col == board_size / 2);
+    if (is_empty) {
+      return (row == board_size / 2) && (col == board_size / 2);
     }
     return board[row][col] == ' ' &&
            ((row - 1 >= 0 && board[row - 1][col] != ' ') ||
@@ -49,8 +49,8 @@ private:
   }
 
   bool is_anchor_in_row(char board_row[board_size], int col) {
-    if(is_empty)
-        return col == board_size / 2 + 1;
+    if (is_empty)
+      return col == board_size / 2 + 1;
     return ((col - 1 >= 0 && board_row[col] != ' ') ||
             (col + 1 < board_size && board_row[col] != ' '));
   }
@@ -219,7 +219,7 @@ private:
   }
 
   inline void decrement_rack_count(char board_row[board_size], int col,
-                                  string prefix) {
+                                   string prefix) {
     int prefix_offset = 1 - prefix.length();
     for (int i = 0; i < (int)prefix.length(); ++i) {
       if (board_row[col + prefix_offset + i] == ' ') {
@@ -320,8 +320,8 @@ public:
       for (int col = 0; col < board_size; ++col) {
         board_hori[row][col] = board[row][col];
         board_vert[row][col] = board[col][row];
-        if(board[row][col] != ' ') {
-            is_empty = false;
+        if (board[row][col] != ' ') {
+          is_empty = false;
         }
       }
     }
@@ -348,7 +348,6 @@ public:
       else
         ++rack_count[get_char_num(c)];
     }
-
   }
 
   list<tuple<int, int, int, string>> get_valid_words() {
