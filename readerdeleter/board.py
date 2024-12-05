@@ -61,6 +61,12 @@ class Board:
             self.letters = [[" " for _ in range(self.size)] for _ in range(self.size)]
         else:
             self.letters = letters
+
+        if all(all(space == ' ' for space in row) for row in self.letters):
+            self.is_blank = True
+        else:
+            self.is_blank = False
+
         self.blank = [[False for _ in range(self.size)] for _ in range(self.size)]
         self.searcher = BoardSearch([tuple(row) for row in self.letters], self.gaddag)
 
@@ -127,7 +133,7 @@ class Board:
     def get_blank_positions(
             self,
             rack: str,
-            valid_word_plays: list[tuple[int, int, int, str]]
+            valid_word_plays: set[tuple[int, int, int, str]]
                             ) -> list[tuple[int, int, int, str, str]]:
         if '_' not in rack:
             return [
@@ -166,6 +172,13 @@ class Board:
 
         return out
 
+    def get_valid_words(self, rack: str) -> set[tuple[int, int, int, str]]:
+        valid_word_plays = set(self.searcher.get_valid_words(rack))
+        if self.is_blank:
+            return set(filter(lambda x: len(x[3]) > 1, valid_word_plays))
+        return valid_word_plays
+
+
 
     def get_plays(self, rack: str) -> list[tuple[int, int, int, str, str]]:
         """
@@ -173,8 +186,7 @@ class Board:
         (direction, row, column, literal word, word with blanks explicit)
         """
         # TODO: score words
-        valid_word_plays = list(set(self.searcher.get_valid_words(rack)))
-        return self.get_blank_positions(rack, valid_word_plays)
+        return self.get_blank_positions(rack, self.get_valid_words(rack))
 
     def auxiliary_score(self, row: int, col: int, char: str, direction: bool):
         """
