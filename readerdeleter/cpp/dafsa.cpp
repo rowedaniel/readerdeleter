@@ -170,12 +170,8 @@ public:
   }
 
   void add_words(std::list<std::string> words) {
-    int i=0;
-    for(std::string word : words) {
+    for(std::string word : words)
       add_word(word);
-      if(++i % 1000 == 0)
-        std::cout << i << ": " << word << std::endl;
-    }
   }
 
   void finish() { replace_or_register(root); }
