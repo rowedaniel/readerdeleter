@@ -58,6 +58,5 @@ if __name__ == '__main__':
     players = [
             ReaderDeleter(),
             Incrementalist(),
-            Incrementalist(),
                ]
     ScrabbleTournament(players).run()
