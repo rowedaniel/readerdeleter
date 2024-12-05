@@ -1,6 +1,6 @@
-from location import *
-from board import *
-from move import *
+from .location import *
+from .board import *
+from .move import *
 
 ALL_TILES = [True] * 7
 

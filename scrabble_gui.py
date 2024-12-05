@@ -1,10 +1,10 @@
 import string
 from tkinter import *
 
-from gatekeeper import GateKeeper
-from incrementalist import Incrementalist
-from location import *
-from board import *
+from scrabble.gatekeeper import GateKeeper
+from scrabble.incrementalist import Incrementalist
+from scrabble.location import *
+from scrabble.board import *
 from enum import Enum
 
 

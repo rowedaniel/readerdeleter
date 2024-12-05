@@ -1,6 +1,6 @@
 import random
 import os
-from location import CENTER
+from .location import CENTER
 
 # Constants about the board representation
 DOUBLE_LETTER_SCORE = '-'
