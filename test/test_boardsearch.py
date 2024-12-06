@@ -309,3 +309,94 @@ def test_empty_firstturn():
     assert len(valid_words) == 6
 
 
+def test_update_vert():
+    gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
+    board_data_pre = (
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+
+    board_data_post = (
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("       S       "),
+            tuple("       E       "),
+            tuple("       T       "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+    pre = BoardSearch(board_data_pre, gaddag);
+    post = BoardSearch(board_data_post, gaddag);
+
+    pre.update_cross_check(6, 7, 'S')
+    pre.update_cross_check(7, 7, 'E')
+    pre.update_cross_check(8, 7, 'T')
+    assert set(pre.get_valid_words("TEST")) == set(post.get_valid_words("TEST"))
+
+def test_update_hori():
+    gaddag = generate_GADDAG(["TEST", "SET", "TESTS"])
+    board_data_pre = (
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+
+    board_data_post = (
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("      SET      "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+            tuple("               "),
+        )
+    pre = BoardSearch(board_data_pre, gaddag);
+    post = BoardSearch(board_data_post, gaddag);
+
+    pre.update_cross_check(7, 6, 'S')
+    pre.update_cross_check(7, 7, 'E')
+    pre.update_cross_check(7, 8, 'T')
+    assert set(pre.get_valid_words("TEST")) == set(post.get_valid_words("TEST"))
+
+

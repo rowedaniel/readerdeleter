@@ -278,6 +278,10 @@ class Board:
 
 
 
+    def update_tile(self, row: int, col: int, letter: str, is_blank: bool) -> None:
+        if is_blank:
+            self.blank[row][col] = True
+        self.searcher.update_cross_check(row, col, letter)
 
     def __str__(self) -> str:
         out = '    ' + ''.join(str(i)[-1] for i in range(15))

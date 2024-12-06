@@ -68,6 +68,68 @@ private:
             (col + 1 < board_size && board_row[col] != ' '));
   }
 
+  void cross_check_at_loc(int row, int col,
+                          uint32_t mask[board_size][board_size],
+                          board_t board) {
+    if (board[row][col] != ' ') {
+      // occupied, mask has to be 0
+      mask[row][col] = 0;
+      return;
+    }
+    if (!is_vert_anchor(board, row,
+                        col)) // nothing above/below to connect to
+      return;
+
+    // default to nothing allowed
+    mask[row][col] = 0;
+
+    // check every character here
+    for (int i = 0; i < alphabet_len; ++i) {
+      // get this character
+      auto node = tree.root;
+      if (node->children[i] == NULL)
+        continue;
+      node = node->children[i];
+
+      int j = 1;
+      // go up
+      while (row - j >= 0 && board[row - j][col] != ' ') {
+        if (node->is_null_child(board[row - j][col])) {
+          break;
+        }
+        node = node->children[get_char_num(board[row - j][col])];
+        ++j;
+      }
+      if (row - j >= 0 && board[row - j][col] != ' ') {
+        // couldn't find a valid word before beginning of prefix
+        continue;
+      }
+
+      // check pivot character
+      if (!node->has_delim_child())
+        continue;
+      node = node->delim_child();
+
+      // go down
+      j = 1;
+      while (row + j < board_size && board[row + j][col] != ' ') {
+        if (node->is_null_child(board[row + j][col])) {
+          break;
+        }
+        node = node->children[get_char_num(board[row + j][col])];
+        ++j;
+      }
+      if ((row + j < board_size && board[row + j][col] != ' ') ||
+          !node->terminal) {
+        // couldn't find a valid word before end of suffix
+        continue;
+      }
+
+      // mark this letter as valid in this space
+      mask[row][col] |= 1 << i;
+    }
+  }
+
   void cross_checks(uint32_t mask[board_size][board_size], board_t board) {
     /**
      * for all spaces adjacent to other spaces, find all legal characters with
@@ -76,63 +138,7 @@ private:
 
     for (int row = 0; row < board_size; ++row) {
       for (int col = 0; col < board_size; ++col) {
-        if (board[row][col] != ' ') {
-          // occupied, mask has to be 0
-          mask[row][col] = 0;
-          continue;
-        }
-        if (!is_vert_anchor(board, row,
-                            col)) // nothing above/below to connect to
-          continue;
-
-        // default to nothing allowed
-        mask[row][col] = 0;
-
-        // check every character here
-        for (int i = 0; i < alphabet_len; ++i) {
-          // get this character
-          auto node = tree.root;
-          if (node->children[i] == NULL)
-            continue;
-          node = node->children[i];
-
-          int j = 1;
-          // go up
-          while (row - j >= 0 && board[row - j][col] != ' ') {
-            if (node->is_null_child(board[row - j][col])) {
-              break;
-            }
-            node = node->children[get_char_num(board[row - j][col])];
-            ++j;
-          }
-          if (row - j >= 0 && board[row - j][col] != ' ') {
-            // couldn't find a valid word before beginning of prefix
-            continue;
-          }
-
-          // check pivot character
-          if (!node->has_delim_child())
-            continue;
-          node = node->delim_child();
-
-          // go down
-          j = 1;
-          while (row + j < board_size && board[row + j][col] != ' ') {
-            if (node->is_null_child(board[row + j][col])) {
-              break;
-            }
-            node = node->children[get_char_num(board[row + j][col])];
-            ++j;
-          }
-          if ((row + j < board_size && board[row + j][col] != ' ') ||
-              !node->terminal) {
-            // couldn't find a valid word before end of suffix
-            continue;
-          }
-
-          // mark this letter as valid in this space
-          mask[row][col] |= 1 << i;
-        }
+        cross_check_at_loc(row, col, mask, board);
       }
     }
   }
@@ -367,6 +373,18 @@ public:
     }
     return words;
   }
+
+  void update_cross_check(int row, int col, char letter) {
+    is_empty = false;
+    board_hori[row][col] = letter;
+    board_vert[col][row] = letter;
+    for(int c=0; c<board_size; ++c) {
+        cross_check_at_loc(c, row, board_vert_mask, board_vert);
+    }
+    for(int r=0; r<board_size; ++r) {
+        cross_check_at_loc(r, col, board_hori_mask, board_hori);
+    }
+  }
 };
 
 namespace py = pybind11;
@@ -376,5 +394,6 @@ PYBIND11_MODULE(boardsearch, m) {
 
   py::class_<BoardSearch>(m, "BoardSearch")
       .def(py::init<array<array<char, board_size>, board_size>, DAFSA &>())
+      .def("update_cross_check", &BoardSearch::update_cross_check)
       .def("get_valid_words", &BoardSearch::get_valid_words);
 }
