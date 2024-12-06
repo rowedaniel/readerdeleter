@@ -1,6 +1,5 @@
-import readerdeleter.board
-import readerdeleter.gaddag
-
+from .board_converter import BoardConverter
+from .gatekeeper import GateKeeper
 from .location import *
 from .board import *
 from .move import *
@@ -12,66 +11,31 @@ class ReaderDeleter:
 
     def __init__(self):
         self._gatekeeper = None
-        self._gaddag = readerdeleter.gaddag.generate_GADDAG(list(DICTIONARY))
-        self._board = readerdeleter.board.Board(self._gaddag)
+        self._board = BoardConverter()
 
-    def set_gatekeeper(self, gatekeeper):
+    def set_gatekeeper(self, gatekeeper: GateKeeper):
         self._gatekeeper = gatekeeper
+        self._board.set_gatekeeper(gatekeeper)
 
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
 
-    def _convert_board(self):
-        orig_board_data = [[self._gatekeeper.get_square(Location(r, c))
-                            for c in range(15)]
-                           for r in range(15)]
-        # TODO: manage blanks
-        board_data = [
-                [ space.upper() if space in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' else ' '
-                    for space in row
-                 ] for row in orig_board_data]
-        self._board = readerdeleter.board.Board(self._gaddag, board_data)
-
-
-    def choose_move(self):
         # update board
-        self._convert_board()
+        self._board.update_board()
 
-        hand = self._convert_hand(self._gatekeeper.get_hand())
-        moves = self._board.get_plays(hand)
+        moves = self._board.get_plays()
         max_move = None
         max_score = 0
-        max_move_orig = None
         for move in moves:
-            move_converted = self._convert_play(move)
-            score = self._gatekeeper.score(move_converted._word,
-                                           move_converted._location,
-                                           move_converted._direction)
-            if score > max_score or score == max_score and move_converted._word > max_move._word:
-                max_move = move_converted
+            score = self._gatekeeper.score(*move)
+            if score > max_score or \
+               max_move is None or \
+               (score == max_score and move[0] > max_move[0]):
+                max_move = move
                 max_score = score
-                max_move_orig = move
 
         if max_move is None:
             return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
-        return max_move
-
-    def _convert_hand(self, hand: list[str]) -> str:
-        return ''.join(hand).upper()
-
-    def _convert_play(self, play: tuple[int, int, int, str, str]) -> PlayWord:
-        """
-        For now, always play
-        """
-        with_blanks = play[-1]
-
-        converted_word = play[-2]
-        converted_word = converted_word.lower()
-        converted_word = converted_word.replace('.', ' ')
-        for i in range(len(converted_word)):
-            if with_blanks[i] == "_":
-                converted_word = converted_word[:i] + \
-                                 converted_word[i].upper() + \
-                                 converted_word[i+1:]
-        direction = HORIZONTAL if play[0] == 0 else VERTICAL
-
-        return PlayWord(converted_word, Location(play[1], play[2]), direction)
+        return PlayWord(*max_move)
 
