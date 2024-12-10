@@ -165,3 +165,6 @@ class Board:
                     out += c
             out += "\n"
         return out
+
+    def copy(self) -> 'Board':
+        return Board(self.letters)
