@@ -1,6 +1,8 @@
 import time
 from .build.dafsa import DAFSA
 
+type GADDAG = DAFSA
+
 def generate_GADDAG_words(words: list[str]) -> list[str]:
     dafsa_words = [
         (s[: p+ 1][::-1] + "@" + s[p + 1 :]).upper() for s in words for p in range(len(s))
