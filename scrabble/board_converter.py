@@ -1,30 +1,43 @@
-import readerdeleter.board
-import readerdeleter.gaddag
+from readerdeleter.board import Board
+from readerdeleter.gaddag import generate_GADDAG, GADDAG
 
-from .location import *
-from .board import *
-from .move import *
+from .location import HORIZONTAL, VERTICAL, Location
+from .board import DICTIONARY
 from .gatekeeper import GateKeeper
 
-FULL_ALPHABET = readerdeleter.board.ALPHABET + readerdeleter.board.ALPHABET.lower()
+ALPHABET_U = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ALPHABET_L = ALPHABET_U.lower()
+ALPHABET_BLANK = ALPHABET_U + "_"
+ALPHABET_UL = ALPHABET_U + ALPHABET_L
 
 class BoardConverter:
 
-    def __init__(self):
-        self._gatekeeper = None
-        self._gaddag = readerdeleter.gaddag.generate_GADDAG(list(DICTIONARY))
-        self._board = None
-        self._previous_board_data = [[" " for _ in range(15)] for _ in range(15)]
+    def __init__(self,
+                 gatekeeper: GateKeeper|None =None,
+                 gaddag: GADDAG=None,
+                 board=None,
+                 previous_board_data=None
+                 ):
+        self._gatekeeper = gatekeeper
+        if gaddag is None:
+            self._gaddag = generate_GADDAG(list(DICTIONARY))
+        else:
+            self._gaddag = gaddag
+        self._board = board
+        if previous_board_data is None:
+            self._previous_board_data = [[" " for _ in range(15)] for _ in range(15)]
+        else:
+            self._previous_board_data = previous_board_data
 
     def _convert_hand(self, hand: list[str]) -> str:
         """ Convert Peter-style hand to readerdeleter-style """
         return ''.join(hand).upper()
 
     def _convert_letter(self, letter: str) -> str:
-        return letter.upper() if letter in FULL_ALPHABET else ' '
+        return letter.upper() if letter in ALPHABET_UL else ' '
 
     def _is_blank(self, letter: str) -> bool:
-        return letter in readerdeleter.board.ALPHABET
+        return letter in ALPHABET_U
 
     def _convert_play(self, play: tuple[int, int, int, str, str]) -> tuple[str, Location, Location]:
         """ Convert readerdeleter-style hand to Peter-style """
@@ -42,10 +55,11 @@ class BoardConverter:
 
         return (converted_word, Location(play[1], play[2]), direction)
 
-    def set_gatekeeper(self, gatekeeper: GateKeeper) -> None:
+    def set_gatekeeper(self, gatekeeper: GateKeeper, reset_data: bool = True) -> None:
         self._gatekeeper = gatekeeper
-        self._board = readerdeleter.board.Board(self._gaddag)
-        self._previous_board_data = [[" " for _ in range(15)] for _ in range(15)]
+        if reset_data:
+            self._board = Board(self._gaddag)
+            self._previous_board_data = [[" " for _ in range(15)] for _ in range(15)]
 
 
     def update_board(self) -> None:
@@ -65,3 +79,10 @@ class BoardConverter:
         plays = self._board.get_plays(hand)
         return list(map(lambda p: self._convert_play(p), plays))
 
+
+    def copy(self) -> 'BoardConverter':
+        if self._board is None:
+            raise ValueError("uninitialized board")
+        board_copy = self._board.copy()
+        prev_data_copy = [[c for c in row] for row in self._previous_board_data]
+        return BoardConverter(self._gatekeeper, self._gaddag, board_copy, prev_data_copy)

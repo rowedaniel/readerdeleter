@@ -151,6 +151,7 @@ class Board:
     def update_tile(self, row: int, col: int, letter: str, is_blank: bool) -> None:
         if is_blank:
             self.blank[row][col] = True
+        self.letters[row][col] = letter
         self.searcher.update_cross_check(row, col, letter)
 
     def __str__(self) -> str:
@@ -167,4 +168,4 @@ class Board:
         return out
 
     def copy(self) -> 'Board':
-        return Board(self.letters)
+        return Board(self.gaddag, [[l for l in row] for row in self.letters])

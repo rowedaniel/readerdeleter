@@ -28,3 +28,6 @@ class PlayWord:
         board.play(self._word, self._location, self._direction, board.get_hand(player_number))
         # These are returned for the benefit of the GUI
         return self._location, self._direction
+
+    def __str__(self):
+        return f'{self._word} at {self._location}, {self._direction}'
