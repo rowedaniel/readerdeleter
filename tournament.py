@@ -61,7 +61,7 @@ class ScrabbleTournament:
             if not board.game_is_over():
                 self.play_move(board, b, 1)
         scores = board.get_scores()
-        # print(f'Final score: {a} {scores[0]}, {b} {scores[1]}. Avg {self._time/self._moves} s/move ({self._time} over {self._moves})\n')
+        print(f'Final score: {a} {scores[0]}, {b} {scores[1]}. Avg {self._time/self._moves} s/move ({self._time} over {self._moves})\n')
         if scores[0] > scores[1]:
             return 1, 0
         elif scores[0] < scores[1]:

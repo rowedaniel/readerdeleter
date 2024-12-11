@@ -146,7 +146,10 @@ class MonteCarlo(BaseBot):
         self._root = None
         self._search_count = search_count
 
-    def choose_play_randomly(self, plays: list[tuple[tuple[str, Location, Location], int]]) -> PlayWord|ExchangeTiles:
+    def choose_play_randomly(self,
+                             node: MonteCarloNode,
+                             plays: list[tuple[tuple[str, Location, Location], int]]
+                             ) -> PlayWord|ExchangeTiles:
         if len(plays) == 0:
             return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
         scores = [w for _,w in plays]
@@ -164,7 +167,7 @@ class MonteCarlo(BaseBot):
 
     def expand(self, node: MonteCarloNode) -> MonteCarloNode:
         plays = node.get_plays()
-        play = self.choose_play_randomly(plays)
+        play = self.choose_play_randomly(node, plays)
         new_node = node.get_copy_with_play(play)
         new_node.set_parent(node, play)
         return new_node
@@ -172,7 +175,7 @@ class MonteCarlo(BaseBot):
     def simulate(self, baseNode: MonteCarloNode) -> float:
 
         # copy node to get a fresh one for playouts
-        play = self.choose_play_randomly(baseNode.get_plays())
+        play = self.choose_play_randomly(baseNode, baseNode.get_plays())
         node = baseNode.get_copy_with_play(play)
 
         # playouts
@@ -180,7 +183,7 @@ class MonteCarlo(BaseBot):
         converter = node.converter
         while not board.game_is_over():
             plays = node.get_fresh_plays()
-            play = self.choose_play_randomly(plays)
+            play = self.choose_play_randomly(node, plays)
             play.play(board, node.player)
             converter.update_board()
             node.switch_player()
@@ -220,9 +223,7 @@ class MonteCarlo(BaseBot):
         return best_node
 
 
-
-
-    def choose_move(self) -> PlayWord|ExchangeTiles:
+    def init_root(self):
         if self._gatekeeper is None:
             raise ValueError("uninitialized gatekeeper")
         self._root = None
@@ -245,6 +246,11 @@ class MonteCarlo(BaseBot):
         self._states = [self._root]
         self._next_turn_states = []
 
+
+
+
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        self.init_root()
         best_node = self.search()
         if best_node is not None and best_node.play is not None:
             return best_node.play
