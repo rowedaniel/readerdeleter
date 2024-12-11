@@ -30,4 +30,4 @@ class PlayWord:
         return self._location, self._direction
 
     def __str__(self):
-        return f'{self._word} at {self._location}, {self._direction}'
+        return f'{self._word} @ {self._location}>{self._direction}'

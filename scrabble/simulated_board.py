@@ -48,7 +48,7 @@ class SimulatedBoard(Board):
         self._squares = [[square for square in row] for row in squares]
         self._bag = list(''.join([c*v for c,v in unseen_letters.items()]))
         random.shuffle(self._bag)
-        self._hands = [[] if hand is None else hand for hand in hands]
+        self._hands = [[] if hand is None else hand.copy() for hand in hands]
         for i,hand in enumerate(hands):
             if hand is None:
                 self._deal(self._hands[i], 7)
@@ -59,9 +59,9 @@ class SimulatedBoard(Board):
 
     def copy_and_play(self, move: PlayWord|ExchangeTiles) -> 'SimulatedBoard':
         new_board = SimulatedBoard(
-                [[s for s in row] for row in self._squares],
-                [hand.copy() for hand in self._hands],
-                self._scores.copy(),
+                self._squares,
+                self._hands,
+                self._scores,
                 self._current_player)
         move.play(new_board, self._current_player)
         return new_board
