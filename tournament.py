@@ -80,26 +80,38 @@ class ScrabbleTournament:
 
 
 if __name__ == '__main__':
+    from scrabble.board_converter import BoardConverter
+    from scrabble.board import DICTIONARY
+    from readerdeleter.gaddag import generate_GADDAG
     import threading
-    total_games = 100
-    threads = 10
+    total_games = 8
+    threads = 4
     game_threads = []
+    scores = [[] for _ in range(threads)]
 
-    def run_game():
-        players = [
-                # Greedy(),
-                ReverseMonteCarlo(20),
-                MonteCarlo(20),
-                   ]
-        scores = ScrabbleTournament(players).run_n_games(total_games // threads)
+    gaddag = generate_GADDAG(list(DICTIONARY))
+    print("generating players")
+    players = [
+            [
+                # ReverseMonteCarlo(20, BoardConverter(gaddag=gaddag)),
+                Greedy(),
+                MonteCarlo(20, BoardConverter(gaddag=gaddag)),
+           ] for _ in range(threads)]
+    print("generated players")
+
+
+    def run_game(i: int):
+        print("running game", i)
+        scores[i] = ScrabbleTournament(players[i]).run_n_games(total_games // threads)
 
     total_time = time.time()
     for i in range(threads):
-        x = threading.Thread(target=run_game)
+        x = threading.Thread(target=run_game, args=[i])
         game_threads.append(x)
         x.start()
 
     for thread in game_threads:
         thread.join()
     total_time = time.time() - total_time
-    print(f"average game took {total_time/total_games} s")
+    total_scores = [sum(score[i] for score in scores) for i in range(2)]
+    print(f"took {total_time}s for {total_games} games on {threads} threads. Final score was {total_scores}")
