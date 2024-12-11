@@ -93,7 +93,7 @@ class MonteCarloNode:
 
 
 class BaseBot:
-    def __init__(self, board: BoardConverter|None = None):
+    def __init__(self, board: BoardConverter = None):
         self._gatekeeper = None
         if board is None:
             self._board = BoardConverter()
@@ -138,7 +138,7 @@ class MonteCarlo(BaseBot):
     def __str__(self) -> str:
         return f"Monte Carlo (s={self._search_count})"
 
-    def __init__(self, search_count: int = 25, board: BoardConverter|None = None):
+    def __init__(self, search_count: int = 25, board: BoardConverter = None):
         super().__init__(board)
         self._root = None
         self._search_count = search_count
