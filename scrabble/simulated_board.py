@@ -42,6 +42,7 @@ class SimulatedBoard(Board):
                 continue
             for letter in hand:
                 unseen_letters[letter] -= 1
+        self.known_hands = [hand is None for hand in hands]
 
 
         # for now, just deal opponent hand randomly
@@ -58,9 +59,10 @@ class SimulatedBoard(Board):
         self._last_move = None
 
     def copy_and_play(self, move: PlayWord|ExchangeTiles) -> 'SimulatedBoard':
+        hands = [None if kh is None else hand for kh, hand in zip(self.known_hands, self._hands)]
         new_board = SimulatedBoard(
                 self._squares,
-                self._hands,
+                hands,
                 self._scores,
                 self._current_player)
         move.play(new_board, self._current_player)
