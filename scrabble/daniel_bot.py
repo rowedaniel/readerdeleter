@@ -96,9 +96,12 @@ class MonteCarloNode:
 
 
 class BaseBot:
-    def __init__(self):
+    def __init__(self, board: BoardConverter|None = None):
         self._gatekeeper = None
-        self._board = BoardConverter()
+        if board is None:
+            self._board = BoardConverter()
+        else:
+            self._board = board
 
     def set_gatekeeper(self, gatekeeper: GateKeeper):
         self._gatekeeper = gatekeeper
@@ -138,8 +141,8 @@ class MonteCarlo(BaseBot):
     def __str__(self) -> str:
         return f"Monte Carlo (s={self._search_count})"
 
-    def __init__(self, search_count: int = 25):
-        super().__init__()
+    def __init__(self, search_count: int = 25, board: BoardConverter|None = None):
+        super().__init__(board)
         self._root = None
         self._search_count = search_count
 
@@ -148,7 +151,7 @@ class MonteCarlo(BaseBot):
             return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
         scores = [w for _,w in plays]
         max_score = max(scores)
-        weights = [(w/max_score)**10 for _,w in plays]
+        weights = [(w/max_score)**1 for _,w in plays]
         return PlayWord(*random.choices(plays, weights=weights)[0][0])
 
     def selection(self) -> MonteCarloNode:
