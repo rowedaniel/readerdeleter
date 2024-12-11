@@ -7,8 +7,6 @@ from .simulated_gatekeeper import SimulatedGateKeeper
 
 import numpy as np
 import random
-import matplotlib.pyplot as plt
-from networkx import Graph, draw, bfs_layout
 
 class MonteCarloNode:
     # TODO: need to make  a simulated scrabble board for playouts
