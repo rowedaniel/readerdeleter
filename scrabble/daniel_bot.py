@@ -249,3 +249,6 @@ class MonteCarlo(BaseBot):
 
 
 
+class ReverseMonteCarlo(MonteCarlo):
+    def simulate(self, baseNode: MonteCarloNode) -> float:
+        return 1 - super().simulate(baseNode)
