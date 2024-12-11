@@ -1,5 +1,6 @@
 from readerdeleter.board import Board
-from readerdeleter.gaddag import generate_GADDAG, GADDAG
+from readerdeleter.gaddag import generate_GADDAG
+from readerdeleter.build.dafsa import DAFSA
 
 from .location import HORIZONTAL, VERTICAL, Location
 from .board import DICTIONARY
@@ -14,7 +15,7 @@ class BoardConverter:
 
     def __init__(self,
                  gatekeeper: GateKeeper|None =None,
-                 gaddag: GADDAG=None,
+                 gaddag: DAFSA=None,
                  board=None,
                  previous_board_data=None
                  ):

@@ -7,9 +7,12 @@ For running, you should need:
 - scipy
 - matplotlib
 - networkx
-Install via pip:
+- torch
+Install via pip (presumably in a venv):
 ```sh
-pip install pybind11 numpy scipy matplotlib networkx
+python3 -m venv myEnv
+source .venv/bin/activate
+pip install pybind11 numpy scipy matplotlib networkx torch
 ```
 
 Next, you need to build the cpp part of the project. Apologies for the bad architecture here,

@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_PREFIX_PATH "/Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.13/site-packages/pybind11" ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH "/Users/rowedaniel/Documents/school/scrabble/.venv/lib/python3.11/site-packages/pybind11" ${CMAKE_PREFIX_PATH})
 
 find_package(pybind11 REQUIRED)
 
