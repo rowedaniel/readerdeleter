@@ -1,7 +1,7 @@
 import time
 
 from scrabble.incrementalist import Incrementalist
-from scrabble.daniel_bot import Greedy, MonteCarlo
+from scrabble.daniel_bot import Greedy, MonteCarlo, ReverseMonteCarlo
 from scrabble.board import Board
 from scrabble.gatekeeper import GateKeeper
 
@@ -80,13 +80,26 @@ class ScrabbleTournament:
 
 
 if __name__ == '__main__':
-    players = [
-            Greedy(),
-            MonteCarlo(20),
-               ]
+    import threading
+    total_games = 100
+    threads = 10
+    game_threads = []
+
+    def run_game():
+        players = [
+                # Greedy(),
+                ReverseMonteCarlo(20),
+                MonteCarlo(20),
+                   ]
+        scores = ScrabbleTournament(players).run_n_games(total_games // threads)
+
     total_time = time.time()
-    total_games = 10
-    scores = ScrabbleTournament(players).run_n_games(total_games)
-    print(scores)
+    for i in range(threads):
+        x = threading.Thread(target=run_game)
+        game_threads.append(x)
+        x.start()
+
+    for thread in game_threads:
+        thread.join()
     total_time = time.time() - total_time
     print(f"average game took {total_time/total_games} s")
