@@ -5,7 +5,6 @@ from .location import Location
 from .gatekeeper import GateKeeper
 
 import random
-from typing import Self
 
 TOTAL_LETTERS = 'aaaaaaaaabbccddddeeeeeeeeeeeeffggghhiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvvwwxyyz__'
 LETTER_COUNT = {
@@ -14,7 +13,7 @@ LETTER_COUNT = {
 
 class SimulatedBoard(Board):
     @classmethod
-    def from_gatekeeper(cls, gatekeeper: GateKeeper) -> Self:
+    def from_gatekeeper(cls, gatekeeper: GateKeeper):
         squares = [[gatekeeper.get_square(Location(r, c)) for c in range(15)] for r in range(15)]
         hand = gatekeeper.get_hand()
         hands = [hand, None]
@@ -23,10 +22,10 @@ class SimulatedBoard(Board):
         return cls(squares, hands, scores, current_player)
 
     def __init__(self,
-                 squares: list[list[str]],
-                 hands: list[list[str]|None],
-                 scores: list[int],
-                 current_player: int,
+                 squares,
+                 hands,
+                 scores,
+                 current_player,
                  ):
     
         # Get list of unseen letters
@@ -58,7 +57,7 @@ class SimulatedBoard(Board):
         self._number_of_passes = 0
         self._last_move = None
 
-    def copy_and_play(self, move: PlayWord|ExchangeTiles) -> 'SimulatedBoard':
+    def copy_and_play(self, move) -> 'SimulatedBoard':
         hands = [None if kh is None else hand for kh, hand in zip(self.known_hands, self._hands)]
         new_board = SimulatedBoard(
                 self._squares,

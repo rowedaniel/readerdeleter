@@ -3,8 +3,6 @@ from .daniel_bot import MonteCarlo, MonteCarloNode
 from .location import Location
 from .move import PlayWord, ExchangeTiles
 
-from typing import Any
-
 import torch
 import torch.nn as nn
 import numpy as np
@@ -57,10 +55,10 @@ class MonteCarloNN(MonteCarlo):
                  policy: Policy,
                  value: Value,
                  search_count: int = 25,
-                 board: BoardConverter|None = None,
-                 train_value_data: list[Any]|None = None,
-                 train_policy_data: list[Any]|None = None,
-                 train_policy_labels: list[Any]|None = None,
+                 board = None,
+                 train_value_data = None,
+                 train_policy_data = None,
+                 train_policy_labels = None,
                  ):
         super().__init__(search_count, board)
         self.value = value
@@ -118,8 +116,8 @@ class MonteCarloNN(MonteCarlo):
 
     def choose_play_randomly(self,
                              node: MonteCarloNode,
-                             plays: list[tuple[tuple[str, Location, Location], int]]
-                             ) -> PlayWord|ExchangeTiles:
+                             plays,
+                             ):
         """
         Choose the most commonly chosen move according to policy heuristic
         """
@@ -159,4 +157,3 @@ class MonteCarloNN(MonteCarlo):
             ])
 
         return best_node.play
-

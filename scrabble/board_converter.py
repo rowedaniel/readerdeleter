@@ -14,8 +14,8 @@ ALPHABET_UL = ALPHABET_U + ALPHABET_L
 class BoardConverter:
 
     def __init__(self,
-                 gatekeeper: GateKeeper|None =None,
-                 gaddag: DAFSA=None,
+                 gatekeeper = None,
+                 gaddag=None,
                  board=None,
                  previous_board_data=None
                  ):
@@ -30,7 +30,7 @@ class BoardConverter:
         else:
             self._previous_board_data = previous_board_data
 
-    def _convert_hand(self, hand: list[str]) -> str:
+    def _convert_hand(self, hand) -> str:
         """ Convert Peter-style hand to readerdeleter-style """
         return ''.join(hand).upper()
 
@@ -40,7 +40,7 @@ class BoardConverter:
     def _is_blank(self, letter: str) -> bool:
         return letter in ALPHABET_U
 
-    def _convert_play(self, play: tuple[int, int, int, str, str]) -> tuple[str, Location, Location]:
+    def _convert_play(self, play):
         """ Convert readerdeleter-style hand to Peter-style """
         with_blanks = play[-1]
 
@@ -73,7 +73,7 @@ class BoardConverter:
                     self._previous_board_data[r][c] = self._convert_letter(space)
                     self._board.update_tile(r,c,self._convert_letter(space), self._is_blank(space))
 
-    def get_plays(self) -> list[tuple[str, Location, Location]]:
+    def get_plays(self):
         if self._gatekeeper is None or self._board is None:
             raise ValueError("gatekeeper uninitialized")
         hand = self._convert_hand(self._gatekeeper.get_hand())

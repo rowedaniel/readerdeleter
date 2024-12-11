@@ -23,7 +23,7 @@ from itertools import combinations
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ._"
 
 class Board:
-    def __init__(self, gaddag: DAFSA, letters: list[list[str]]|None = None, prev_boardsearch: BoardSearch|None = None):
+    def __init__(self, gaddag: DAFSA, letters=None, prev_boardsearch=None):
         self.size = 15
         self.gaddag = gaddag
         # use capital for letters, lowercase for blanks of that letter
@@ -44,7 +44,7 @@ class Board:
             self.searcher = prev_boardsearch
         self.plays = None
 
-    def permute_blank_character(self, word: str, character: str, blanks: int) -> set[str]:
+    def permute_blank_character(self, word: str, character: str, blanks: int):
         """
         generate all permutations of 'word' with 'character' replaced with a blank
         """
@@ -62,7 +62,7 @@ class Board:
             out.add(word)
         return out
 
-    def permute_spare_blank(self, word: str, blanks: int, start: int = 0) -> set[str]:
+    def permute_spare_blank(self, word: str, blanks: int, start: int = 0):
         """
         generate all permutations of 'word' with characters replaced with blanks.
         (Only newly-placed non-blank characters are replaced)
@@ -85,8 +85,7 @@ class Board:
     def get_blank_positions(
             self,
             rack: str,
-            valid_word_plays: set[tuple[int, int, int, str]]
-                            ) -> list[tuple[int, int, int, str, str]]:
+            valid_word_plays):
         if '_' not in rack:
             return [
                 (direction, row, col, word, word)
@@ -124,7 +123,7 @@ class Board:
 
         return out
 
-    def get_valid_words(self, rack: str) -> set[tuple[int, int, int, str]]:
+    def get_valid_words(self, rack: str):
         valid_word_plays = set(self.searcher.get_valid_words(rack))
         if self.is_blank:
             return set(filter(lambda x: len(x[3]) > 1, valid_word_plays))
@@ -132,14 +131,14 @@ class Board:
 
 
 
-    def get_plays(self, rack: str) -> list[tuple[int, int, int, str, str]]:
+    def get_plays(self, rack: str):
         """
         Get the set of all possibles plays, in the form:
         (direction, row, column, literal word, word with blanks explicit)
         """
         return self.get_blank_positions(rack, self.get_valid_words(rack))
 
-    def play(self, play: tuple[int, int, int, str, str]) -> None:
+    def play(self, play) -> None:
         column_word, row, col, word, word_blanks = play
         for i,char in enumerate(word):
             cur_r = row + i * (column_word)

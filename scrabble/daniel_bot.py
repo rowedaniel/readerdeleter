@@ -5,7 +5,6 @@ from .move import PlayWord, ExchangeTiles
 from .simulated_board import SimulatedBoard
 from .simulated_gatekeeper import SimulatedGateKeeper
 
-from typing import Self
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -18,7 +17,7 @@ class MonteCarloNode:
                  state: SimulatedBoard,
                  gatekeeper: SimulatedGateKeeper,
                  converter: BoardConverter,
-                 opponent_hand_likelihoods: dict[str, float],
+                 opponent_hand_likelihoods,
                  width: int = 5):
 
         """
@@ -45,7 +44,7 @@ class MonteCarloNode:
         self._gatekeeper.set_player(self.player)
         
 
-    def get_copy_with_play(self, play: PlayWord|ExchangeTiles) -> 'MonteCarloNode':
+    def get_copy_with_play(self, play) -> 'MonteCarloNode':
         new_player = 1 - self.player
         new_state = self.state.copy_and_play(play)
         new_gatekeeper = SimulatedGateKeeper(new_state, new_player)
@@ -56,20 +55,20 @@ class MonteCarloNode:
         new_node = MonteCarloNode(new_player, new_state, new_gatekeeper, new_converter, {})
         return new_node
 
-    def set_parent(self, parent: Self, play: PlayWord|ExchangeTiles):
+    def set_parent(self, parent, play):
         self._parent = parent
         self.play = play
         parent.set_child(self, play)
 
-    def set_child(self, child: Self, play: PlayWord|ExchangeTiles):
+    def set_child(self, child, play):
         self.children[play] = child
 
-    def get_plays(self) -> list[tuple[tuple[str, Location, Location], int]]:
+    def get_plays(self):
         if self._plays is None:
             self._plays = self.get_fresh_plays()
         return self._plays
 
-    def get_fresh_plays(self) -> list[tuple[tuple[str, Location, Location], int]]:
+    def get_fresh_plays(self):
         return [(play, self._gatekeeper.score(*play)) for play in self.converter.get_plays()]
 
     def UCB(self) -> float:
@@ -111,7 +110,7 @@ class BaseBot:
 class Greedy(BaseBot):
     def __str__(self) -> str:
         return "Greedy"
-    def choose_move(self) -> PlayWord|ExchangeTiles:
+    def choose_move(self):
         if self._gatekeeper is None:
             raise ValueError("uninitialized gatekeeper")
 
@@ -147,9 +146,9 @@ class MonteCarlo(BaseBot):
         self._search_count = search_count
 
     def choose_play_randomly(self,
-                             node: MonteCarloNode,
-                             plays: list[tuple[tuple[str, Location, Location], int]]
-                             ) -> PlayWord|ExchangeTiles:
+                             node,
+                             plays
+                             ):
         if len(plays) == 0:
             return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
         scores = [w for _,w in plays]
@@ -196,7 +195,7 @@ class MonteCarlo(BaseBot):
         return 0.5 # draw
 
 
-    def search(self) -> MonteCarloNode|None:
+    def search(self):
 
 
         for _ in range(self._search_count):
