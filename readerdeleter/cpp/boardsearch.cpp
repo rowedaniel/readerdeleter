@@ -20,7 +20,7 @@ typedef char board_t[board_size][board_size];
 
 class BoardSearch {
 private:
-  DAFSA tree;
+  DAFSA *tree;
   // count of every tile, plus blank tiles
   int rack_count[alphabet_len + 1] = {0};
   uint32_t board_hori_mask[board_size][board_size];
@@ -86,7 +86,7 @@ private:
     // check every character here
     for (int i = 0; i < alphabet_len; ++i) {
       // get this character
-      auto node = tree.root;
+      auto node = tree->root;
       if (node->children[i] == NULL)
         continue;
       node = node->children[i];
@@ -282,7 +282,7 @@ private:
     /*}*/
 
     for (auto [n, prefix] :
-         get_word_prefixes_in_row(board_mask_row, board_row, col, tree.root)) {
+         get_word_prefixes_in_row(board_mask_row, board_row, col, tree->root)) {
 
       // remove prefix items from rack
       // TODO: figure out how blank tiles work:
@@ -330,7 +330,7 @@ public:
      */
 
     // set necessary vars
-    tree = wordlist;
+    tree = &wordlist;
 
     // getup transpose of board
     is_empty = true;
@@ -356,6 +356,29 @@ public:
     cross_checks(board_vert_mask, board_vert);
   }
 
+  BoardSearch(DAFSA *_tree,
+          uint32_t _board_hori_mask[board_size][board_size],
+          uint32_t _board_vert_mask[board_size][board_size],
+              board_t _board_hori, bool _is_empty) {
+    tree = _tree;
+    // count of every tile, plus blank tiles
+    for (int row = 0; row < board_size; ++row) {
+      for (int col = 0; col < board_size; ++col) {
+        board_hori_mask[row][col] = _board_hori_mask[row][col];
+        board_vert_mask[row][col] = _board_vert_mask[row][col];
+        board_hori[row][col] = _board_hori[row][col];
+        board_vert[row][col] = _board_hori[col][row];
+      }
+    }
+    is_empty = _is_empty;
+  }
+
+  BoardSearch copy() {
+    BoardSearch *search =
+        new BoardSearch(tree, board_hori_mask, board_vert_mask, board_hori, is_empty);
+    return *search;
+  }
+
   list<tuple<int, int, int, string>> get_valid_words(string rack) {
     /**
      * Returns list of valid words, in format:
@@ -378,11 +401,11 @@ public:
     is_empty = false;
     board_hori[row][col] = letter;
     board_vert[col][row] = letter;
-    for(int c=0; c<board_size; ++c) {
-        cross_check_at_loc(c, row, board_vert_mask, board_vert);
+    for (int c = 0; c < board_size; ++c) {
+      cross_check_at_loc(c, row, board_vert_mask, board_vert);
     }
-    for(int r=0; r<board_size; ++r) {
-        cross_check_at_loc(r, col, board_hori_mask, board_hori);
+    for (int r = 0; r < board_size; ++r) {
+      cross_check_at_loc(r, col, board_hori_mask, board_hori);
     }
   }
 };
@@ -395,5 +418,6 @@ PYBIND11_MODULE(boardsearch, m) {
   py::class_<BoardSearch>(m, "BoardSearch")
       .def(py::init<array<array<char, board_size>, board_size>, DAFSA &>())
       .def("update_cross_check", &BoardSearch::update_cross_check)
+      .def("copy", &BoardSearch::copy)
       .def("get_valid_words", &BoardSearch::get_valid_words);
 }

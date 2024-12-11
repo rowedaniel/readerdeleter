@@ -23,7 +23,7 @@ from itertools import combinations
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ._"
 
 class Board:
-    def __init__(self, gaddag: DAFSA, letters: list[list[str]]|None = None):
+    def __init__(self, gaddag: DAFSA, letters: list[list[str]]|None = None, prev_boardsearch: BoardSearch|None = None):
         self.size = 15
         self.gaddag = gaddag
         # use capital for letters, lowercase for blanks of that letter
@@ -38,7 +38,10 @@ class Board:
             self.is_blank = False
 
         self.blank = [[False for _ in range(self.size)] for _ in range(self.size)]
-        self.searcher = BoardSearch([tuple(row) for row in self.letters], self.gaddag)
+        if prev_boardsearch is None:
+            self.searcher = BoardSearch([tuple(row) for row in self.letters], self.gaddag)
+        else:
+            self.searcher = prev_boardsearch
         self.plays = None
 
     def permute_blank_character(self, word: str, character: str, blanks: int) -> set[str]:
@@ -168,4 +171,4 @@ class Board:
         return out
 
     def copy(self) -> 'Board':
-        return Board(self.gaddag, [[l for l in row] for row in self.letters])
+        return Board(self.gaddag, [[l for l in row] for row in self.letters], self.searcher.copy())
