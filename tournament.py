@@ -17,16 +17,33 @@ class ScrabbleTournament:
         Plays two games between each pair of contestants, one with each going first. Prints the number of wins for each
         contestant (including 0.5 wins for each tie).
         """
-        scores = [0.0] * len(players)
-        for i in range(len(players)):
-            for j in range(len(players)):
+        scores = [0.0] * len(self._players)
+        for i in range(len(self._players)):
+            for j in range(len(self._players)):
                 if i != j:
-                    i_won, j_won = self.play_game(players[i], players[j])
+                    i_won, j_won = self.play_game(self._players[i], self._players[j])
                     scores[i] += i_won
                     scores[j] += j_won
                     yield self._time, self._moves
-        for i, player in enumerate(players):
+        for i, player in enumerate(self._players):
             print(f'{str(player)}: {scores[i]}')
+
+    def run_n_games(self, n: int):
+        """
+        play n games between each pair
+        """
+        scores = [0.0] * len(self._players)
+        for _ in range(n):
+            for i in range(len(self._players)):
+                for j in range(len(self._players)):
+                    if i != j:
+                        i_won, j_won = self.play_game(self._players[i], self._players[j])
+                        scores[i] += i_won
+                        scores[j] += j_won
+                        print("finished game,", scores)
+        for i, player in enumerate(self._players):
+            print(f'{str(player)}: {scores[i]}')
+        return scores
 
     def play_game(self, a, b):
         """
@@ -35,7 +52,7 @@ class ScrabbleTournament:
         """
         self._time = 0
         self._moves = 0
-        print(f'{a} vs {b}:')
+        # print(f'{a} vs {b}:')
         board = Board()
         a.set_gatekeeper(GateKeeper(board, 0))
         b.set_gatekeeper(GateKeeper(board, 1))
@@ -44,7 +61,7 @@ class ScrabbleTournament:
             if not board.game_is_over():
                 self.play_move(board, b, 1)
         scores = board.get_scores()
-        print(f'Final score: {a} {scores[0]}, {b} {scores[1]}. Avg {self._time/self._moves} s/move ({self._time} over {self._moves}\n')
+        # print(f'Final score: {a} {scores[0]}, {b} {scores[1]}. Avg {self._time/self._moves} s/move ({self._time} over {self._moves})\n')
         if scores[0] > scores[1]:
             return 1, 0
         elif scores[0] < scores[1]:
@@ -65,15 +82,11 @@ class ScrabbleTournament:
 if __name__ == '__main__':
     players = [
             Greedy(),
-            MonteCarlo(),
+            MonteCarlo(20),
                ]
-    total_time = 0
-    total_turns = 0
-    total_games = 0
-    for i in range(10):
-        for game_t, game_m in ScrabbleTournament(players).run():
-            total_time += game_t
-            total_turns += game_m
-            total_games += 1
-
-    print(f"average game took {total_time/total_games} s, with each game having an average of {total_turns/total_games} turns per game")
+    total_time = time.time()
+    total_games = 10
+    scores = ScrabbleTournament(players).run_n_games(total_games)
+    print(scores)
+    total_time = time.time() - total_time
+    print(f"average game took {total_time/total_games} s")
