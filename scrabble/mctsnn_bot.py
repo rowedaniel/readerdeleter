@@ -124,7 +124,7 @@ class MonteCarloNN(MonteCarlo):
         Choose the most commonly chosen move according to policy heuristic
         """
         if len(plays) == 0:
-            return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
+            return ExchangeTiles([True] * 7)
         features = self.create_policy_features(node, plays)
         weights = self.policy(features)
         # print('weights shape:', weights.shape)
@@ -136,7 +136,7 @@ class MonteCarloNN(MonteCarlo):
     def choose_move(self) -> PlayWord|ExchangeTiles:
         self.init_root()
         if self._root is None or len(self._root.get_plays()) == 0:
-            return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
+            return ExchangeTiles([True] * 7)
 
 
         # populate training data
@@ -145,7 +145,7 @@ class MonteCarloNN(MonteCarlo):
 
         best_node = self.search()
         if best_node is None or best_node.play is None:
-            return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
+            return ExchangeTiles([True] * 7)
 
         # populate policy data
         if self.train_policy_data is not None and \

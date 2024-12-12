@@ -16,7 +16,7 @@ class TrainingTournament(ScrabbleTournament):
         self.policy = Policy()
         self.value = Value()
 
-        self.n_threads = 5
+        self.n_threads = 1
 
 
         self.policy_X = [[] for _ in range(2*self.n_threads)]
@@ -69,6 +69,7 @@ class TrainingTournament(ScrabbleTournament):
                 threads = []
                 for t in range(self.n_threads):
                     x = threading.Thread(target=play_thread, args=[t])
+                    play_thread(0)
                     threads.append(x)
                     x.start()
                 for thread in threads:

@@ -1,7 +1,8 @@
 import time
 
 from scrabble.incrementalist import Incrementalist
-from scrabble.daniel_bot import Greedy, MonteCarlo, ReverseMonteCarlo
+from scrabble.daniel_bot import Greedy, GreedyExit, MonteCarlo, HeuristicMonteCarloExit
+from scrabble.elliot import Elliot
 from scrabble.board import Board
 from scrabble.gatekeeper import GateKeeper
 
@@ -11,6 +12,7 @@ class ScrabbleTournament:
         self._players = players
         self._time = 0
         self._moves = 0
+        self._avg_scores = [0 for _ in players]
 
     def run(self):
         """
@@ -38,6 +40,7 @@ class ScrabbleTournament:
                 for j in range(len(self._players)):
                     if i != j:
                         i_won, j_won = self.play_game(self._players[i], self._players[j])
+                        self._avg_scores[0], self._avg_scores[1] = self._avg_scores[1], self._avg_scores[0]
                         scores[i] += i_won
                         scores[j] += j_won
                         print("finished game,", scores)
@@ -62,6 +65,8 @@ class ScrabbleTournament:
                 self.play_move(board, b, 1)
         scores = board.get_scores()
         print(f'Final score: {a} {scores[0]}, {b} {scores[1]}. Avg {self._time/self._moves} s/move ({self._time} over {self._moves})\n')
+        self._avg_scores[0] += scores[0]
+        self._avg_scores[1] += scores[1]
         if scores[0] > scores[1]:
             return 1, 0
         elif scores[0] < scores[1]:
@@ -84,25 +89,32 @@ if __name__ == '__main__':
     from scrabble.board import DICTIONARY
     from readerdeleter.gaddag import generate_GADDAG
     import threading
-    total_games = 8
+    total_games = 256
     threads = 4
     game_threads = []
     scores = [[] for _ in range(threads)]
+    in_game_scores = [[] for _ in range(threads)]
 
     gaddag = generate_GADDAG(list(DICTIONARY))
     print("generating players")
     players = [
             [
                 # ReverseMonteCarlo(20, BoardConverter(gaddag=gaddag)),
-                Greedy(),
-                MonteCarlo(20, BoardConverter(gaddag=gaddag)),
+                # MonteCarlo(1, BoardConverter(gaddag=gaddag)),
+                HeuristicMonteCarloExit(200, BoardConverter(gaddag=gaddag)),
+                GreedyExit(),
+                # GreedyExit(),
+                # AntiGreedy(),
+                # Elliot(),
            ] for _ in range(threads)]
     print("generated players")
 
 
     def run_game(i: int):
         print("running game", i)
-        scores[i] = ScrabbleTournament(players[i]).run_n_games(total_games // threads)
+        game = ScrabbleTournament(players[i])
+        scores[i] = game.run_n_games(total_games // threads)
+        in_game_scores[i] = game._avg_scores
 
     total_time = time.time()
     for i in range(threads):
@@ -114,4 +126,6 @@ if __name__ == '__main__':
         thread.join()
     total_time = time.time() - total_time
     total_scores = [sum(score[i] for score in scores) for i in range(2)]
-    print(f"took {total_time}s for {total_games} games on {threads} threads. Final score was {total_scores}")
+    print(f"took {total_time}s for 2*{total_games} games on {threads} threads. Final score was {total_scores}")
+    total_in_game_scores = [sum(score[i] for score in in_game_scores)/total_games/2 for i in range(2)]
+    print(f"average in-game scores was {total_in_game_scores}")

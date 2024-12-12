@@ -4,6 +4,7 @@ from .location import Location
 from .move import PlayWord, ExchangeTiles
 from .simulated_board import SimulatedBoard
 from .simulated_gatekeeper import SimulatedGateKeeper
+from .board import TILE_VALUES
 
 from typing import Self
 import numpy as np
@@ -19,7 +20,7 @@ class MonteCarloNode:
                  gatekeeper: SimulatedGateKeeper,
                  converter: BoardConverter,
                  opponent_hand_likelihoods: dict[str, float],
-                 width: int = 5):
+                 width: int = 6):
 
         """
         Monte Carlo node with progressive widening
@@ -130,8 +131,54 @@ class Greedy(BaseBot):
                 max_score = score
 
         if max_move is None:
-            return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
+            return ExchangeTiles([True] * 7)
         return PlayWord(*max_move)
+
+
+class GreedyExit(Greedy):
+    def __str__(self):
+        return "Greedy (With early exit)"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+        if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
+            print("opponent passed")
+            hand = self._gatekeeper.get_hand()
+            tile_values = sum(TILE_VALUES[c] for c in hand)
+            if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
+                print("winning, so quit whilst ahead")
+                high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
+                return ExchangeTiles(high_value_tiles)
+        return super().choose_move()
+                # Winning by more than double hand value, so likely to win if you pass and end game
+
+
+
+
+class AntiGreedy(Greedy):
+    def __str__(self) -> str:
+        return "Generous"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+
+        # update board
+        self._board.update_board()
+
+        moves = self._board.get_plays()
+        min_move = None
+        min_score = 0
+        for move in moves:
+            score = self._gatekeeper.score(*move)
+            if score < min_score or \
+               min_move is None or \
+               (score == min_score and move[0] < min_move[0]):
+                min_move = move
+                min_score = score
+
+        if min_move is None:
+            return ExchangeTiles([True] * 7)
+        return PlayWord(*min_move)
 
 class MonteCarlo(BaseBot):
     """
@@ -151,10 +198,10 @@ class MonteCarlo(BaseBot):
                              plays: list[tuple[tuple[str, Location, Location], int]]
                              ) -> PlayWord|ExchangeTiles:
         if len(plays) == 0:
-            return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
+            return ExchangeTiles([True] * 7)
         scores = [w for _,w in plays]
         max_score = max(scores)
-        weights = [(w/max_score)**1 for _,w in plays]
+        weights = [(w/max_score)**40 for _,w in plays]
         return PlayWord(*random.choices(plays, weights=weights)[0][0])
 
     def selection(self) -> MonteCarloNode:
@@ -215,7 +262,7 @@ class MonteCarlo(BaseBot):
             # labels = {n: f'{n.wins}/{n.sims}\n{n.play}' for n in self._states}
             # draw(graph, labels=labels, pos=bfs_layout(graph, self._states[0]))
             # plt.show()
-            #
+
         if self._root is None:
             return None
 
@@ -254,9 +301,32 @@ class MonteCarlo(BaseBot):
         best_node = self.search()
         if best_node is not None and best_node.play is not None:
             return best_node.play
-        return ExchangeTiles([0, 1, 2, 3, 4, 5, 6])
+        return ExchangeTiles([True] * 7)
 
 
+class HeuristicMonteCarlo(MonteCarlo):
+    def simulate(self, baseNode: MonteCarloNode) -> float:
+        scores = baseNode.state.get_scores()
+        p = baseNode.player
+        o = 1 - baseNode.player
+        win_estimate = 1/(np.exp(-(scores[p]-scores[o])/50))
+        return 1-win_estimate
+
+class HeuristicMonteCarloExit(HeuristicMonteCarlo):
+    def __str__(self):
+        return "Greedy (With early exit)"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+        if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
+            print("opponent passed")
+            hand = self._gatekeeper.get_hand()
+            tile_values = sum(TILE_VALUES[c] for c in hand)
+            if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
+                print("winning, so quit whilst ahead")
+                high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
+                return ExchangeTiles(high_value_tiles)
+        return super().choose_move()
 
 class ReverseMonteCarlo(MonteCarlo):
     def simulate(self, baseNode: MonteCarloNode) -> float:

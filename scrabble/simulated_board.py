@@ -59,7 +59,8 @@ class SimulatedBoard(Board):
         self._last_move = None
 
     def copy_and_play(self, move: PlayWord|ExchangeTiles) -> 'SimulatedBoard':
-        hands = [None if kh is None else hand for kh, hand in zip(self.known_hands, self._hands)]
+        hands = [None if kh and p != self._current_player else hand\
+                for p,(kh, hand) in enumerate(zip(self.known_hands, self._hands))]
         new_board = SimulatedBoard(
                 self._squares,
                 hands,
