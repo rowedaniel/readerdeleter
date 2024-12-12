@@ -1,5 +1,6 @@
 # Installation
 
+## Python requirements
 See pyproject.toml for the full list of requirements.
 For running, you should need:
 - pybind11
@@ -7,14 +8,15 @@ For running, you should need:
 - scipy
 - matplotlib
 - networkx
-- torch
+- torch (probably not necessary)
 Install via pip (presumably in a venv):
 ```sh
 python3 -m venv myEnv
 source .venv/bin/activate
-pip install pybind11 numpy scipy matplotlib networkx torch
+pip install pybind11 numpy scipy matplotlib networkx
 ```
 
+## Building the c++
 Next, you need to build the cpp part of the project. Apologies for the bad architecture here,
 I'm not so familiar with c++/cmake projects.
 
@@ -38,3 +40,6 @@ Steps:
    cmake ..
    make
    ```
+
+# Usage
+

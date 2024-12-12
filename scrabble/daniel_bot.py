@@ -12,6 +12,8 @@ import random
 import matplotlib.pyplot as plt
 from networkx import Graph, draw, bfs_layout
 
+
+# Supporting data structures
 class MonteCarloNode:
     # TODO: need to make  a simulated scrabble board for playouts
     def __init__(self,
@@ -108,59 +110,6 @@ class BaseBot:
         self._gatekeeper = gatekeeper
         self._board.set_gatekeeper(gatekeeper)
 
-
-class Greedy(BaseBot):
-    def __str__(self) -> str:
-        return "Greedy"
-    def choose_move(self) -> PlayWord|ExchangeTiles:
-        if self._gatekeeper is None:
-            raise ValueError("uninitialized gatekeeper")
-
-        # update board
-        self._board.update_board()
-
-        moves = self._board.get_plays()
-        max_move = None
-        max_score = 0
-        for move in moves:
-            score = self._gatekeeper.score(*move)
-            if score > max_score or \
-               max_move is None or \
-               (score == max_score and move[0] > max_move[0]):
-                max_move = move
-                max_score = score
-
-        if max_move is None:
-            return ExchangeTiles([True] * 7)
-        return PlayWord(*max_move)
-
-
-class GreedyExit(Greedy):
-    def __str__(self):
-        return "Greedy (With early exit)"
-    def choose_move(self) -> PlayWord|ExchangeTiles:
-        if self._gatekeeper is None:
-            raise ValueError("uninitialized gatekeeper")
-        if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
-            print("opponent passed")
-            hand = self._gatekeeper.get_hand()
-            tile_values = sum(TILE_VALUES[c] for c in hand)
-            if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
-                print("winning, so quit whilst ahead")
-                high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
-                return ExchangeTiles(high_value_tiles)
-        return super().choose_move()
-                # Winning by more than double hand value, so likely to win if you pass and end game
-
-
-
-
-class AntiGreedy(Greedy):
-    def __str__(self) -> str:
-        return "Generous"
-    def choose_move(self) -> PlayWord|ExchangeTiles:
-        if self._gatekeeper is None:
-            raise ValueError("uninitialized gatekeeper")
 
         # update board
         self._board.update_board()
@@ -303,7 +252,6 @@ class MonteCarlo(BaseBot):
             return best_node.play
         return ExchangeTiles([True] * 7)
 
-
 class HeuristicMonteCarlo(MonteCarlo):
     def simulate(self, baseNode: MonteCarloNode) -> float:
         scores = baseNode.state.get_scores()
@@ -313,6 +261,13 @@ class HeuristicMonteCarlo(MonteCarlo):
         return 1-win_estimate
 
 class HeuristicMonteCarloExit(HeuristicMonteCarlo):
+    """
+    IMPORTANT:
+        Peter, use this bot!
+    """
+    def __init__(self, search_count: int = 250, board: BoardConverter|None = None):
+        super().__init__(search_count, board)
+
     def __str__(self):
         return "Heuristic MCTS (With early exit)"
     def choose_move(self) -> PlayWord|ExchangeTiles:
@@ -328,6 +283,79 @@ class HeuristicMonteCarloExit(HeuristicMonteCarlo):
                 return ExchangeTiles(high_value_tiles)
         return super().choose_move()
 
+
+
+## Some other bots I experimented with
 class ReverseMonteCarlo(MonteCarlo):
     def simulate(self, baseNode: MonteCarloNode) -> float:
         return 1 - super().simulate(baseNode)
+
+class MonteCarloExit(MonteCarlo):
+    def __str__(self):
+        return "Heuristic MCTS (With early exit)"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+        if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
+            print("opponent passed")
+            hand = self._gatekeeper.get_hand()
+            tile_values = sum(TILE_VALUES[c] for c in hand)
+            if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
+                print("winning, so quit whilst ahead")
+                high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
+                return ExchangeTiles(high_value_tiles)
+        return super().choose_move()
+
+class Greedy(BaseBot):
+    def __str__(self) -> str:
+        return "Greedy"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+
+        # update board
+        self._board.update_board()
+
+        moves = self._board.get_plays()
+        max_move = None
+        max_score = 0
+        for move in moves:
+            score = self._gatekeeper.score(*move)
+            if score > max_score or \
+               max_move is None or \
+               (score == max_score and move[0] > max_move[0]):
+                max_move = move
+                max_score = score
+
+        if max_move is None:
+            return ExchangeTiles([True] * 7)
+        return PlayWord(*max_move)
+
+
+class GreedyExit(Greedy):
+    def __str__(self):
+        return "Greedy (With early exit)"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+        if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
+            print("opponent passed")
+            hand = self._gatekeeper.get_hand()
+            tile_values = sum(TILE_VALUES[c] for c in hand)
+            if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
+                print("winning, so quit whilst ahead")
+                high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
+                return ExchangeTiles(high_value_tiles)
+        return super().choose_move()
+                # Winning by more than double hand value, so likely to win if you pass and end game
+
+
+
+
+class AntiGreedy(Greedy):
+    def __str__(self) -> str:
+        return "Generous"
+    def choose_move(self) -> PlayWord|ExchangeTiles:
+        if self._gatekeeper is None:
+            raise ValueError("uninitialized gatekeeper")
+

@@ -2,7 +2,6 @@ import time
 
 from scrabble.incrementalist import Incrementalist
 from scrabble.daniel_bot import Greedy, GreedyExit, MonteCarlo, HeuristicMonteCarloExit
-from scrabble.elliot import Elliot
 from scrabble.board import Board
 from scrabble.gatekeeper import GateKeeper
 
@@ -89,7 +88,7 @@ if __name__ == '__main__':
     from scrabble.board import DICTIONARY
     from readerdeleter.gaddag import generate_GADDAG
     import threading
-    total_games = 256
+    total_games = 4
     threads = 4
     game_threads = []
     scores = [[] for _ in range(threads)]
@@ -100,9 +99,10 @@ if __name__ == '__main__':
     players = [
             [
                 # ReverseMonteCarlo(20, BoardConverter(gaddag=gaddag)),
-                # MonteCarlo(1, BoardConverter(gaddag=gaddag)),
-                HeuristicMonteCarloExit(200, BoardConverter(gaddag=gaddag)),
+                MonteCarlo(200, BoardConverter(gaddag=gaddag)),
+                # HeuristicMonteCarloExit(200, BoardConverter(gaddag=gaddag)),
                 GreedyExit(),
+                MonteCarlo(1000, BoardConverter(gaddag=gaddag)),
                 # GreedyExit(),
                 # AntiGreedy(),
                 # Elliot(),
