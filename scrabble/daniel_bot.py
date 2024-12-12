@@ -314,7 +314,7 @@ class HeuristicMonteCarlo(MonteCarlo):
 
 class HeuristicMonteCarloExit(HeuristicMonteCarlo):
     def __str__(self):
-        return "Greedy (With early exit)"
+        return "Heuristic MCTS (With early exit)"
     def choose_move(self) -> PlayWord|ExchangeTiles:
         if self._gatekeeper is None:
             raise ValueError("uninitialized gatekeeper")
