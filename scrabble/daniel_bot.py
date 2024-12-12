@@ -141,6 +141,7 @@ class MonteCarlo(BaseBot):
         super().__init__(board)
         self._root = None
         self._search_count = search_count
+        self._high_score_weight = 40
 
     def choose_play_randomly(self,
                              node: MonteCarloNode,
@@ -150,7 +151,7 @@ class MonteCarlo(BaseBot):
             return ExchangeTiles([True] * 7)
         scores = [w for _,w in plays]
         max_score = max(scores)
-        weights = [(w/max_score)**40 for _,w in plays]
+        weights = [(w/max_score)**self._high_score_weight for _,w in plays]
         return PlayWord(*random.choices(plays, weights=weights)[0][0])
 
     def selection(self) -> MonteCarloNode:
@@ -184,7 +185,6 @@ class MonteCarlo(BaseBot):
             converter.update_board()
             node.switch_player()
         scores = board.get_scores()
-        # print("finished simulation. Scores are", scores)
         if scores[baseNode.player] > scores[1 - baseNode.player]:
             return 0 # win
         elif scores[baseNode.player] < scores[1 - baseNode.player]:
@@ -257,7 +257,7 @@ class HeuristicMonteCarlo(MonteCarlo):
         scores = baseNode.state.get_scores()
         p = baseNode.player
         o = 1 - baseNode.player
-        win_estimate = 1/(np.exp(-(scores[p]-scores[o])/50))
+        win_estimate = 1/(np.exp(-(scores[p]-scores[o])/50) + 1)
         return 1-win_estimate
 
 class HeuristicMonteCarloExit(HeuristicMonteCarlo):
@@ -265,23 +265,27 @@ class HeuristicMonteCarloExit(HeuristicMonteCarlo):
     IMPORTANT:
         Peter, use this bot!
     """
-    def __init__(self, search_count: int = 250, board: BoardConverter|None = None):
+    def __init__(self, search_count: int = 500, high_score_weight: int = 20, board: BoardConverter|None = None):
+        self._high_score_weight = high_score_weight
         super().__init__(search_count, board)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Heuristic MCTS (With early exit)"
     def choose_move(self) -> PlayWord|ExchangeTiles:
         if self._gatekeeper is None:
             raise ValueError("uninitialized gatekeeper")
         if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
-            print("opponent passed")
             hand = self._gatekeeper.get_hand()
             tile_values = sum(TILE_VALUES[c] for c in hand)
             if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
-                print("winning, so quit whilst ahead")
                 high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
                 return ExchangeTiles(high_value_tiles)
         return super().choose_move()
+
+
+class ReaderDeleter(HeuristicMonteCarloExit):
+    def __str__(self) -> str:
+        return f"ReaderDeleter (depth={self._search_count})"
 
 
 
@@ -297,11 +301,9 @@ class MonteCarloExit(MonteCarlo):
         if self._gatekeeper is None:
             raise ValueError("uninitialized gatekeeper")
         if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
-            print("opponent passed")
             hand = self._gatekeeper.get_hand()
             tile_values = sum(TILE_VALUES[c] for c in hand)
             if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
-                print("winning, so quit whilst ahead")
                 high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
                 return ExchangeTiles(high_value_tiles)
         return super().choose_move()
@@ -339,11 +341,9 @@ class GreedyExit(Greedy):
         if self._gatekeeper is None:
             raise ValueError("uninitialized gatekeeper")
         if type(self._gatekeeper.get_last_move()) == ExchangeTiles:
-            print("opponent passed")
             hand = self._gatekeeper.get_hand()
             tile_values = sum(TILE_VALUES[c] for c in hand)
             if self._gatekeeper.get_my_score() > self._gatekeeper.get_opponent_score() + tile_values*2:
-                print("winning, so quit whilst ahead")
                 high_value_tiles = [(TILE_VALUES[c] >= 5) for c in hand]
                 return ExchangeTiles(high_value_tiles)
         return super().choose_move()

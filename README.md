@@ -43,3 +43,18 @@ Steps:
 
 # Usage
 
+Please copy the entirety of the `readerdeleter/` directory into your version of scrabble.
+Additionally, please copy:
+- `scrabble/daniel_bot.py`
+- `scrabble/simulated_board.py`
+- `scrabble/simulated_gatekeeper.py`
+into your version of scrabble.
+
+To use my bot, invoke it as follows.
+```python
+from scrabble.daniel_bot import ReaderDeleter
+bot = ReaderDeleter()
+```
+
+If it is too slow, you can turn down the default `search_count=500` to something a bit more reasonable.
+At that depth, it takes less than 8 seconds per turn on my computer.
